@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-200 font-serif">
   <!-- Welcome Pop-up -->
@@ -35,7 +37,7 @@
     <section id="studio" class="flex-1 relative pt-24 bg-gray-900">
       <div class="max-w-6xl mx-auto py-12 px-6">
         <div class="text-center mb-12">
-          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Welcome to the Studio</h2>
+          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Welcome to our Studio</h2>
           <p class="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive studio for voice-driven collaboration.</p>
           <p class="text-lg text-gray-400 mt-4">Contract Address: 
             <span id="contract-address" class="text-blue-400 cursor-pointer relative group" onclick="copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump')" title="Click to copy">
@@ -217,7 +219,7 @@
         </div>
         <div class="mt-6 text-center">
           <p class="text-gray-400 text-sm">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
-          <p id="last-updated" class="text-gray-400 text-sm mt-2">Last updated: 06:15 AM, July 31, 2025</p>
+          <p id="last-updated" class="text-gray-400 text-sm mt-2">Last updated: 06:51 AM, July 31, 2025</p>
           <p class="text-gray-500 text-xs mt-1">Data refreshes every 30 seconds</p>
         </div>
       </div>
@@ -268,58 +270,100 @@
   </div>
 
   <script>
-    // 2D Canvas Setup
-    const canvas = document.getElementById('studio-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight * 0.6; // Adjusted for reduced canvas height
+    // Wait for Firebase scripts to load before initializing
+    document.addEventListener('DOMContentLoaded', () => {
+      // Firebase Configuration
+      const firebaseConfig = {
+        // Replace with your Firebase project configuration
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
 
-    // Load Background Image
-    const bgImage = new Image();
-    bgImage.src = 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=3600&q=80';
-    bgImage.onload = () => {
-      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-    };
+      // Initialize Firebase
+      if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        window.storage = firebase.storage();
+      } else {
+        console.error('Firebase SDK not loaded. Please check the Firebase script inclusion.');
+      }
 
-    // Animation Loop
-    function animate() {
-      requestAnimationFrame(animate);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-    }
-    animate();
-
-    // Resize Handler
-    window.addEventListener('resize', () => {
+      // 2D Canvas Setup
+      const canvas = document.getElementById('studio-canvas');
+      const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight * 0.6;
-      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-    });
 
-    // Copy to Clipboard Function
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        const tooltip = document.querySelector('#contract-address span');
-        tooltip.textContent = 'Copied!';
-        setTimeout(() => {
-          tooltip.textContent = 'Click to copy';
-        }, 2000);
-      }).catch(err => {
-        console.error('Failed to copy:', err);
+      // Load Background Image
+      const bgImage = new Image();
+      bgImage.src = 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=3600&q=80';
+      bgImage.onload = () => {
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      };
+
+      // Animation Loop
+      function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      }
+      animate();
+
+      // Resize Handler
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight * 0.6;
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
       });
-    }
 
-    // Navigation Active State
-    const navLinks = document.querySelectorAll('.nav-link');
-    function setActiveNavLink() {
-      const scrollPosition = window.scrollY + 100; // Offset for header
+      // Copy to Clipboard Function
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          const tooltip = document.querySelector('#contract-address span');
+          tooltip.textContent = 'Copied!';
+          setTimeout(() => {
+            tooltip.textContent = 'Click to copy';
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy:', err);
+        });
+      }
+
+      // Navigation Active State
+      const navLinks = document.querySelectorAll('.nav-link');
+      function setActiveNavLink() {
+        const scrollPosition = window.scrollY + 100;
+        navLinks.forEach(link => {
+          const sectionId = link.getAttribute('href').substring(1);
+          const section = document.getElementById(sectionId);
+          if (section) {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+              navLinks.forEach(l => {
+                l.classList.remove('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+                l.classList.add('text-gray-300');
+              });
+              link.classList.remove('text-gray-300');
+              link.classList.add('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+            }
+          }
+        });
+      }
+
       navLinks.forEach(link => {
-        const sectionId = link.getAttribute('href').substring(1);
-        const section = document.getElementById(sectionId);
-        if (section) {
-          const sectionTop = section.offsetTop;
-          const sectionHeight = section.offsetHeight;
-          if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const sectionId = link.getAttribute('href').substring(1);
+          const section = document.getElementById(sectionId);
+          if (section) {
+            window.scrollTo({
+              top: section.offsetTop - 80,
+              behavior: 'smooth'
+            });
             navLinks.forEach(l => {
               l.classList.remove('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
               l.classList.add('text-gray-300');
@@ -327,358 +371,409 @@
             link.classList.remove('text-gray-300');
             link.classList.add('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
           }
-        }
+        });
       });
-    }
 
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const sectionId = link.getAttribute('href').substring(1);
-        const section = document.getElementById(sectionId);
-        if (section) {
-          window.scrollTo({
-            top: section.offsetTop - 80, // Adjust for fixed header
-            behavior: 'smooth'
-          });
-          navLinks.forEach(l => {
-            l.classList.remove('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
-            l.classList.add('text-gray-300');
-          });
-          link.classList.remove('text-gray-300');
-          link.classList.add('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
-        }
+      window.addEventListener('scroll', setActiveNavLink);
+      window.addEventListener('load', setActiveNavLink);
+
+      // Welcome Pop-up
+      const joinNowBtn = document.getElementById('join-now-btn');
+      joinNowBtn.addEventListener('click', () => {
+        document.getElementById('welcome-popup').style.display = 'none';
       });
-    });
 
-    window.addEventListener('scroll', setActiveNavLink);
-    window.addEventListener('load', setActiveNavLink);
+      // Voice Recording Functionality
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      let mediaRecorder;
+      let recordedChunks = [];
+      let recordedBuffer;
+      const recordBtn = document.getElementById('record-btn');
+      const stopBtn = document.getElementById('stop-btn');
+      const recordStatus = document.getElementById('record-status');
+      const effectControls = document.getElementById('effect-controls');
+      const effectSelect = document.getElementById('effect-select');
+      const eqLow = document.getElementById('eq-low');
+      const eqMid = document.getElementById('eq-mid');
+      const eqHigh = document.getElementById('eq-high');
+      const recordingNameInput = document.getElementById('recording-name');
+      const saveBtn = document.getElementById('save-btn');
+      const uploadAudio = document.getElementById('upload-audio');
+      const recordingsList = document.getElementById('recordings-list');
+      let recordings = [];
 
-    // Welcome Pop-up
-    const joinNowBtn = document.getElementById('join-now-btn');
-    joinNowBtn.addEventListener('click', () => {
-      document.getElementById('welcome-popup').style.display = 'none';
-    });
-
-    // Voice Recording Functionality
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    let mediaRecorder;
-    let recordedChunks = [];
-    let recordedBuffer;
-    const recordBtn = document.getElementById('record-btn');
-    const stopBtn = document.getElementById('stop-btn');
-    const recordStatus = document.getElementById('record-status');
-    const effectControls = document.getElementById('effect-controls');
-    const effectSelect = document.getElementById('effect-select');
-    const eqLow = document.getElementById('eq-low');
-    const eqMid = document.getElementById('eq-mid');
-    const eqHigh = document.getElementById('eq-high');
-    const recordingNameInput = document.getElementById('recording-name');
-    const saveBtn = document.getElementById('save-btn');
-    const uploadAudio = document.getElementById('upload-audio');
-    const recordingsList = document.getElementById('recordings-list');
-    let recordings = [];
-
-    // Check Microphone Permission
-    async function checkMicPermission() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-        recordBtn.disabled = false;
-        recordStatus.textContent = 'Ready to record';
-      } catch (err) {
-        recordStatus.textContent = 'Microphone access denied';
-        console.error('Microphone permission error:', err);
-      }
-    }
-    checkMicPermission();
-
-    async function startRecording() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) recordedChunks.push(e.data);
-        };
-        mediaRecorder.onstop = async () => {
-          const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-          recordedChunks = [];
-          const reader = new FileReader();
-          reader.onload = async () => {
-            const arrayBuffer = reader.result;
-            recordedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            effectControls.classList.remove('hidden');
-            recordStatus.textContent = 'Apply effects and save your recording';
-            recordBtn.classList.remove('hidden');
-            stopBtn.classList.add('hidden');
-          };
-          reader.readAsArrayBuffer(blob);
-        };
-        mediaRecorder.start();
-        recordStatus.textContent = 'Recording... Click Stop or press ESC';
-        recordBtn.classList.add('hidden');
-        stopBtn.classList.remove('hidden');
-      } catch (err) {
-        recordStatus.textContent = 'Error accessing microphone';
-        console.error(err);
-      }
-    }
-
-    function stopRecording() {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-      }
-    }
-
-    async function applyAudioEffect(audioBuffer, effect, eqSettings) {
-      const offlineCtx = new OfflineAudioContext(1, audioBuffer.length, audioBuffer.sampleRate);
-      const source = offlineCtx.createBufferSource();
-      source.buffer = audioBuffer;
-
-      let lastNode = source;
-
-      // Apply Equalizer
-      const lowFilter = offlineCtx.createBiquadFilter();
-      lowFilter.type = 'lowshelf';
-      lowFilter.frequency.setValueAtTime(300, offlineCtx.currentTime);
-      lowFilter.gain.setValueAtTime(eqSettings.low, offlineCtx.currentTime);
-      lastNode.connect(lowFilter);
-      lastNode = lowFilter;
-
-      const midFilter = offlineCtx.createBiquadFilter();
-      midFilter.type = 'peaking';
-      midFilter.frequency.setValueAtTime(1000, offlineCtx.currentTime);
-      midFilter.gain.setValueAtTime(eqSettings.mid, offlineCtx.currentTime);
-      lastNode.connect(midFilter);
-      lastNode = midFilter;
-
-      const highFilter = offlineCtx.createBiquadFilter();
-      highFilter.type = 'highshelf';
-      highFilter.frequency.setValueAtTime(3000, offlineCtx.currentTime);
-      highFilter.gain.setValueAtTime(eqSettings.high, offlineCtx.currentTime);
-      lastNode.connect(highFilter);
-      lastNode = highFilter;
-
-      // Apply Effect
-      if (effect === 'reverb') {
-        const convolver = offlineCtx.createConvolver();
-        const impulse = createImpulseResponse(offlineCtx, 2, 0.5);
-        convolver.buffer = impulse;
-        lastNode.connect(convolver);
-        lastNode = convolver;
-      } else if (effect === 'pitch-up') {
-        source.playbackRate.value = 1.2;
-      } else if (effect === 'pitch-down') {
-        source.playbackRate.value = 0.8;
-      }
-
-      lastNode.connect(offlineCtx.destination);
-      source.start();
-      return await offlineCtx.startRendering();
-    }
-
-    function createImpulseResponse(context, duration, decay) {
-      const length = context.sampleRate * duration;
-      const impulse = context.createBuffer(1, length, context.sampleRate);
-      const data = impulse.getChannelData(0);
-      for (let i = 0; i < length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
-      }
-      return impulse;
-    }
-
-    async function audioBufferToWav(buffer) {
-      const numChannels = buffer.numberOfChannels;
-      const sampleRate = buffer.sampleRate;
-      const length = buffer.length * numChannels * 2;
-      const wavBuffer = new ArrayBuffer(44 + length);
-      const view = new DataView(wavBuffer);
-
-      writeString(view, 0, 'RIFF');
-      view.setUint32(4, 36 + length, true);
-      writeString(view, 8, 'WAVE');
-      writeString(view, 12, 'fmt ');
-      view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, numChannels, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, sampleRate * numChannels * 2, true);
-      view.setUint16(32, numChannels * 2, true);
-      view.setUint16(34, 16, true);
-      writeString(view, 36, 'data');
-      view.setUint32(40, length, true);
-
-      const channelData = buffer.getChannelData(0);
-      for (let i = 0; i < buffer.length; i++) {
-        view.setInt16(44 + i * 2, channelData[i] * 0x7FFF, true);
-      }
-
-      return new Blob([view], { type: 'audio/wav' });
-    }
-
-    function writeString(view, offset, string) {
-      for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-      }
-    }
-
-    async function saveRecording() {
-      const effect = effectSelect.value;
-      const eqSettings = {
-        low: parseFloat(eqLow.value),
-        mid: parseFloat(eqMid.value),
-        high: parseFloat(eqHigh.value)
-      };
-      const name = recordingNameInput.value.trim() || `Recording_${new Date().toLocaleString()}`;
-      const processedBuffer = await applyAudioEffect(recordedBuffer, effect, eqSettings);
-      const blob = await audioBufferToWav(processedBuffer);
-      const url = URL.createObjectURL(blob);
-      addRecordingToArchive(name, url);
-      effectControls.classList.add('hidden');
-      recordStatus.textContent = 'Recording saved!';
-      recordingNameInput.value = '';
-      eqLow.value = 0;
-      eqMid.value = 0;
-      eqHigh.value = 0;
-      effectSelect.value = 'none';
-    }
-
-    async function handleAudioUpload(file) {
-      const reader = new FileReader();
-      reader.onload = async () => {
+      // Check Microphone Permission
+      async function checkMicPermission() {
         try {
-          const arrayBuffer = reader.result;
-          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-          const name = prompt('Enter a name for the uploaded audio:', file.name) || file.name;
-          const blob = await audioBufferToWav(audioBuffer);
-          const url = URL.createObjectURL(blob);
-          addRecordingToArchive(name, url);
-          recordStatus.textContent = 'Audio uploaded and saved!';
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach(track => track.stop());
+          recordBtn.disabled = false;
+          recordStatus.textContent = 'Ready to record';
         } catch (err) {
-          recordStatus.textContent = 'Error processing uploaded audio';
-          console.error('Upload error:', err);
+          recordStatus.textContent = 'Microphone access denied';
+          console.error('Microphone permission error:', err);
         }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function addRecordingToArchive(name, url) {
-      const recording = { name, url, id: Date.now() };
-      recordings.push(recording);
-      const recordingDiv = document.createElement('div');
-      recordingDiv.className = 'p-4 bg-gray-700 rounded-lg flex items-center justify-between';
-      recordingDiv.innerHTML = `
-        <div class="flex items-center space-x-4">
-          <span class="text-gray-200">${name}</span>
-          <audio controls src="${url}" class="max-w-[200px]"></audio>
-        </div>
-        <div class="flex space-x-2">
-          <button class="rename-btn bg-blue-500 hover:bg-blue-600 text-gray-900 py-1 px-3 rounded" data-id="${recording.id}">Rename</button>
-          <button class="delete-btn bg-red-500 hover:bg-red-600 text-gray-900 py-1 px-3 rounded" data-id="${recording.id}">Delete</button>
-        </div>
-      `;
-      recordingsList.prepend(recordingDiv);
-    }
-
-    // Event Listeners
-    recordBtn.addEventListener('click', startRecording);
-    stopBtn.addEventListener('click', stopRecording);
-    saveBtn.addEventListener('click', saveRecording);
-    uploadAudio.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        handleAudioUpload(e.target.files[0]);
       }
-    });
+      checkMicPermission();
 
-    recordingsList.addEventListener('click', (e) => {
-      if (e.target.classList.contains('rename-btn')) {
-        const id = parseInt(e.target.dataset.id);
-        const recording = recordings.find(r => r.id === id);
-        if (recording) {
-          const newName = prompt('Enter new name for the recording:', recording.name);
-          if (newName) {
-            recording.name = newName;
-            const recordingDiv = e.target.closest('div');
-            recordingDiv.querySelector('span').textContent = newName;
+      async function startRecording() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) recordedChunks.push(e.data);
+          };
+          mediaRecorder.onstop = async () => {
+            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+            recordedChunks = [];
+            const reader = new FileReader();
+            reader.onload = async () => {
+              const arrayBuffer = reader.result;
+              recordedBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+              effectControls.classList.remove('hidden');
+              recordStatus.textContent = 'Apply effects and save your recording';
+              recordBtn.classList.remove('hidden');
+              stopBtn.classList.add('hidden');
+            };
+            reader.readAsArrayBuffer(blob);
+          };
+          mediaRecorder.start();
+          recordStatus.textContent = 'Recording... Click Stop or press ESC';
+          recordBtn.classList.add('hidden');
+          stopBtn.classList.remove('hidden');
+        } catch (err) {
+          recordStatus.textContent = 'Error accessing microphone';
+          console.error(err);
+        }
+      }
+
+      function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+      }
+
+      async function applyAudioEffect(audioBuffer, effect, eqSettings) {
+        const offlineCtx = new OfflineAudioContext(1, audioBuffer.length, audioBuffer.sampleRate);
+        const source = offlineCtx.createBufferSource();
+        source.buffer = audioBuffer;
+
+        let lastNode = source;
+
+        // Apply Equalizer
+        const lowFilter = offlineCtx.createBiquadFilter();
+        lowFilter.type = 'lowshelf';
+        lowFilter.frequency.setValueAtTime(300, offlineCtx.currentTime);
+        lowFilter.gain.setValueAtTime(eqSettings.low, offlineCtx.currentTime);
+        lastNode.connect(lowFilter);
+        lastNode = lowFilter;
+
+        const midFilter = offlineCtx.createBiquadFilter();
+        midFilter.type = 'peaking';
+        midFilter.frequency.setValueAtTime(1000, offlineCtx.currentTime);
+        midFilter.gain.setValueAtTime(eqSettings.mid, offlineCtx.currentTime);
+        lastNode.connect(midFilter);
+        lastNode = midFilter;
+
+        const highFilter = offlineCtx.createBiquadFilter();
+        highFilter.type = 'highshelf';
+        highFilter.frequency.setValueAtTime(3000, offlineCtx.currentTime);
+        highFilter.gain.setValueAtTime(eqSettings.high, offlineCtx.currentTime);
+        lastNode.connect(highFilter);
+        lastNode = highFilter;
+
+        // Apply Effect
+        if (effect === 'reverb') {
+          const convolver = offlineCtx.createConvolver();
+          const impulse = createImpulseResponse(offlineCtx, 2, 0.5);
+          convolver.buffer = impulse;
+          lastNode.connect(convolver);
+          lastNode = convolver;
+        } else if (effect === 'pitch-up') {
+          source.playbackRate.value = 1.2;
+        } else if (effect === 'pitch-down') {
+          source.playbackRate.value = 0.8;
+        }
+
+        lastNode.connect(offlineCtx.destination);
+        source.start();
+        return await offlineCtx.startRendering();
+      }
+
+      function createImpulseResponse(context, duration, decay) {
+        const length = context.sampleRate * duration;
+        const impulse = context.createBuffer(1, length, context.sampleRate);
+        const data = impulse.getChannelData(0);
+        for (let i = 0; i < length; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+        }
+        return impulse;
+      }
+
+      async function audioBufferToWav(buffer) {
+        const numChannels = buffer.numberOfChannels;
+        const sampleRate = buffer.sampleRate;
+        const length = buffer.length * numChannels * 2;
+        const wavBuffer = new ArrayBuffer(44 + length);
+        const view = new DataView(wavBuffer);
+
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + length, true);
+        writeString(view, 8, 'WAVE');
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * numChannels * 2, true);
+        view.setUint16(32, numChannels * 2, true);
+        view.setUint16(34, 16, true);
+        writeString(view, 36, 'data');
+        view.setUint32(40, length, true);
+
+        const channelData = buffer.getChannelData(0);
+        for (let i = 0; i < buffer.length; i++) {
+          view.setInt16(44 + i * 2, channelData[i] * 0x7FFF, true);
+        }
+
+        return new Blob([view], { type: 'audio/wav' });
+      }
+
+      function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+          view.setUint8(offset + i, string.charCodeAt(i));
+        }
+      }
+
+      async function saveRecording() {
+        if (!window.storage) {
+          recordStatus.textContent = 'Firebase not initialized';
+          return;
+        }
+        const effect = effectSelect.value;
+        const eqSettings = {
+          low: parseFloat(eqLow.value),
+          mid: parseFloat(eqMid.value),
+          high: parseFloat(eqHigh.value)
+        };
+        const name = recordingNameInput.value.trim() || `Recording_${new Date().toLocaleString()}`;
+        const processedBuffer = await applyAudioEffect(recordedBuffer, effect, eqSettings);
+        const blob = await audioBufferToWav(processedBuffer);
+        const fileName = `${name}_${Date.now()}.wav`;
+        try {
+          const storageRef = window.storage.ref(`recordings/${fileName}`);
+          await storageRef.put(blob);
+          const url = await storageRef.getDownloadURL();
+          addRecordingToArchive(name, url, fileName);
+          effectControls.classList.add('hidden');
+          recordStatus.textContent = 'Recording saved to cloud!';
+          recordingNameInput.value = '';
+          eqLow.value = 0;
+          eqMid.value = 0;
+          eqHigh.value = 0;
+          effectSelect.value = 'none';
+        } catch (err) {
+          recordStatus.textContent = 'Error saving recording to cloud';
+          console.error('Firebase save error:', err);
+        }
+      }
+
+      async function handleAudioUpload(file) {
+        if (!window.storage) {
+          recordStatus.textContent = 'Firebase not initialized';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            const arrayBuffer = reader.result;
+            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            const name = prompt('Enter a name for the uploaded audio:', file.name) || file.name;
+            const blob = await audioBufferToWav(audioBuffer);
+            const fileName = `${name}_${Date.now()}.wav`;
+            const storageRef = window.storage.ref(`recordings/${fileName}`);
+            await storageRef.put(blob);
+            const url = await storageRef.getDownloadURL();
+            addRecordingToArchive(name, url, fileName);
+            recordStatus.textContent = 'Audio uploaded and saved to cloud!';
+          } catch (err) {
+            recordStatus.textContent = 'Error processing uploaded audio';
+            console.error('Upload error:', err);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function addRecordingToArchive(name, url, fileName) {
+        const recording = { name, url, id: Date.now(), fileName };
+        recordings.push(recording);
+        const recordingDiv = document.createElement('div');
+        recordingDiv.className = 'p-6 bg-gradient-to-br from-blue-900/70 to-purple-900/70 border border-blue-700 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl';
+        recordingDiv.innerHTML = `
+          <div class="flex flex-col space-y-4">
+            <div class="flex items-center space-x-4">
+              <i class="fas fa-microphone-alt text-2xl text-yellow-400"></i>
+              <span class="text-lg font-semibold text-gray-200">${name}</span>
+            </div>
+            <audio controls src="${url}" class="w-full rounded-lg bg-gray-800/50 accent-blue-500"></audio>
+            <div class="flex justify-end space-x-2">
+              <button class="rename-btn bg-blue-500 hover:bg-blue-600 text-gray-900 py-1 px-3 rounded text-sm font-medium" data-id="${recording.id}" data-filename="${fileName}">Rename</button>
+              <button class="delete-btn bg-red-500 hover:bg-red-600 text-gray-900 py-1 px-3 rounded text-sm font-medium" data-id="${recording.id}" data-filename="${fileName}">Delete</button>
+            </div>
+          </div>
+        `;
+        recordingsList.prepend(recordingDiv);
+      }
+
+      async function loadRecordings() {
+        if (!window.storage) {
+          console.error('Firebase storage not initialized');
+          return;
+        }
+        try {
+          const storageRef = window.storage.ref('recordings');
+          const listResult = await storageRef.listAll();
+          recordingsList.innerHTML = '';
+          recordings = [];
+          for (const itemRef of listResult.items) {
+            const url = await itemRef.getDownloadURL();
+            const name = itemRef.name.split('_').slice(0, -1).join('_') || 'Unnamed Recording';
+            addRecordingToArchive(name, url, itemRef.name);
+          }
+        } catch (err) {
+          console.error('Error loading recordings:', err);
+        }
+      }
+
+      // Event Listeners
+      recordBtn.addEventListener('click', startRecording);
+      stopBtn.addEventListener('click', stopRecording);
+      saveBtn.addEventListener('click', saveRecording);
+      uploadAudio.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          handleAudioUpload(e.target.files[0]);
+        }
+      });
+
+      recordingsList.addEventListener('click', async (e) => {
+        if (!window.storage) {
+          console.error('Firebase storage not initialized');
+          return;
+        }
+        if (e.target.classList.contains('rename-btn')) {
+          const id = parseInt(e.target.dataset.id);
+          const fileName = e.target.dataset.filename;
+          const recording = recordings.find(r => r.id === id);
+          if (recording) {
+            const newName = prompt('Enter new name for the recording:', recording.name);
+            if (newName) {
+              try {
+                const oldRef = window.storage.ref(`recordings/${fileName}`);
+                const blob = await (await fetch(recording.url)).blob();
+                const newFileName = `${newName}_${Date.now()}.wav`;
+                const newRef = window.storage.ref(`recordings/${newFileName}`);
+                await newRef.put(blob);
+                await oldRef.delete();
+                recording.name = newName;
+                recording.fileName = newFileName;
+                recording.url = await newRef.getDownloadURL();
+                const recordingDiv = e.target.closest('div');
+                recordingDiv.querySelector('span').textContent = newName;
+                recordingDiv.querySelector('audio').src = recording.url;
+                recordingDiv.querySelector('.rename-btn').dataset.filename = newFileName;
+                recordingDiv.querySelector('.delete-btn').dataset.filename = newFileName;
+              } catch (err) {
+                console.error('Error renaming recording:', err);
+              }
+            }
+          }
+        } else if (e.target.classList.contains('delete-btn')) {
+          const id = parseInt(e.target.dataset.id);
+          const fileName = e.target.dataset.filename;
+          try {
+            await window.storage.ref(`recordings/${fileName}`).delete();
+            recordings = recordings.filter(r => r.id !== id);
+            e.target.closest('div').remove();
+          } catch (err) {
+            console.error('Error deleting recording:', err);
           }
         }
-      } else if (e.target.classList.contains('delete-btn')) {
-        const id = parseInt(e.target.dataset.id);
-        recordings = recordings.filter(r => r.id !== id);
-        e.target.closest('div').remove();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mediaRecorder && mediaRecorder.state === 'recording') {
+          stopRecording();
+        }
+      });
+
+      // Load recordings on page load
+      window.addEventListener('load', loadRecordings);
+
+      // Fetch Crypto Data
+      async function updateCryptoData() {
+        try {
+          const price = 0.000000;
+          const holders = 1677;
+          const priceChange = 'N/A';
+          const volume = 'N/A';
+          const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+          document.getElementById('price').textContent = `$${price.toFixed(6)}`;
+          document.getElementById('holders').textContent = holders.toLocaleString();
+          document.getElementById('price-change').textContent = priceChange;
+          document.getElementById('volume').textContent = volume;
+          document.getElementById('last-updated').textContent = `Last updated: ${now}`;
+          console.log('Crypto data updated:', { price, holders, priceChange, volume });
+
+          // Animate Holders card on data update
+          gsap.to('#holders-card', {
+            y: -10,
+            duration: 0.5,
+            yoyo: true,
+            repeat: 1,
+            ease: 'power2.inOut'
+          });
+        } catch (err) {
+          console.error('Error fetching crypto data:', err.message);
+          document.getElementById('price').textContent = '$0.000000';
+          document.getElementById('holders').textContent = '1,677';
+          document.getElementById('price-change').textContent = 'N/A';
+          document.getElementById('volume').textContent = 'N/A';
+          document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString('en-US', { hour12: false })}`;
+          console.warn('Using fallback crypto data');
+        }
+        setTimeout(updateCryptoData, 30000);
       }
-    });
+      updateCryptoData();
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && mediaRecorder && mediaRecorder.state === 'recording') {
-        stopRecording();
-      }
-    });
-
-    // Fetch Crypto Data
-    async function updateCryptoData() {
-      try {
-        const price = 0.000000; // Updated from document
-        const holders = 1677; // No new holder data, retaining previous value
-        const priceChange = 'N/A'; // Not provided in document
-        const volume = 'N/A'; // Not provided in document
-        const now = new Date().toLocaleTimeString('en-US', { hour12: false });
-        document.getElementById('price').textContent = `$${price.toFixed(6)}`;
-        document.getElementById('holders').textContent = holders.toLocaleString();
-        document.getElementById('price-change').textContent = priceChange;
-        document.getElementById('volume').textContent = volume;
-        document.getElementById('last-updated').textContent = `Last updated: ${now}`;
-        console.log('Crypto data updated:', { price, holders, priceChange, volume });
-
-        // Animate Holders card on data update
-        gsap.to('#holders-card', {
-          y: -10,
-          duration: 0.5,
-          yoyo: true,
-          repeat: 1,
-          ease: 'power2.inOut'
+      // GSAP Animations for Tokenomics and Live Token Data
+      document.getElementById('total-supply-card').addEventListener('mouseenter', () => {
+        gsap.to('#total-supply-card', {
+          scale: 1.1,
+          duration: 0.3,
+          ease: 'power2.out'
         });
-      } catch (err) {
-        console.error('Error fetching crypto data:', err.message);
-        document.getElementById('price').textContent = '$0.000000';
-        document.getElementById('holders').textContent = '1,677';
-        document.getElementById('price-change').textContent = 'N/A';
-        document.getElementById('volume').textContent = 'N/A';
-        document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString('en-US', { hour12: false })}`;
-        console.warn('Using fallback crypto data');
-      }
-      setTimeout(updateCryptoData, 30000);
-    }
-    updateCryptoData();
+      });
+      document.getElementById('total-supply-card').addEventListener('mouseleave', () => {
+        gsap.to('#total-supply-card', {
+          scale: 1,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      });
 
-    // GSAP Animations for Tokenomics and Live Token Data
-    document.getElementById('total-supply-card').addEventListener('mouseenter', () => {
-      gsap.to('#total-supply-card', {
-        scale: 1.1,
-        duration: 0.3,
-        ease: 'power2.out'
+      document.getElementById('price-card').addEventListener('mouseenter', () => {
+        gsap.to('#price-card', {
+          scale: 1.1,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
       });
-    });
-    document.getElementById('total-supply-card').addEventListener('mouseleave', () => {
-      gsap.to('#total-supply-card', {
-        scale: 1,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    });
-
-    document.getElementById('price-card').addEventListener('mouseenter', () => {
-      gsap.to('#price-card', {
-        scale: 1.1,
-        duration: 0.3,
-        ease: 'power2.out'
-      });
-    });
-    document.getElementById('price-card').addEventListener('mouseleave', () => {
-      gsap.to('#price-card', {
-        scale: 1,
-        duration: 0.3,
-        ease: 'power2.out'
+      document.getElementById('price-card').addEventListener('mouseleave', () => {
+        gsap.to('#price-card', {
+          scale: 1,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
       });
     });
   </script>
