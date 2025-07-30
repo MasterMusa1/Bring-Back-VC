@@ -9,59 +9,116 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+  <style>
+    /* Custom styles for mobile hamburger menu and audio player */
+    .hamburger-menu {
+      display: none;
+    }
+    @media (max-width: 640px) {
+      .hamburger-menu {
+        display: block;
+      }
+      .nav-menu {
+        display: none;
+      }
+      .nav-menu.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(8px);
+        padding: 1rem;
+        z-index: 50;
+      }
+      .nav-menu.active a {
+        margin: 0.5rem 0;
+        text-align: center;
+      }
+      audio::-webkit-media-controls-panel {
+        background-color: rgba(31, 41, 55, 0.8);
+        border-radius: 0.5rem;
+      }
+    }
+    .loading-spinner {
+      display: none;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin-left: 1rem;
+    }
+    .loading-spinner.active {
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-gray-200 font-serif">
   <!-- Welcome Pop-up -->
-  <div id="welcome-popup" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-    <div class="bg-gray-800 p-8 rounded-lg text-center">
-      <h2 class="text-3xl font-bold text-yellow-400 mb-4">Welcome to Bring Back VC</h2>
-      <p class="mb-6 text-gray-300">click to join.</p>
-      <button id="join-now-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded">Join Now</button>
+  <div id="welcome-popup" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 px-4">
+    <div class="bg-gray-800 p-6 sm:p-8 rounded-lg text-center max-w-md w-full">
+      <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">Welcome to Bring Back VC</h2>
+      <p class="mb-6 text-gray-300 text-sm sm:text-base">Click to join the community!</p>
+      <button id="join-now-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400">Join Now</button>
     </div>
   </div>
 
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-black/20 backdrop-blur-md border-b border-gray-700/50 p-4 flex justify-between items-center fixed w-full z-40">
-      <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Bring Back VC</h1>
-      <nav class="flex space-x-1 items-center">
-        <a href="#studio" class="nav-link px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300" aria-label="Navigate to Studio section">Studio</a>
-        <a href="#archive" class="nav-link px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300" aria-label="Navigate to Archive section">Archive</a>
-        <a href="#about" class="nav-link px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300" aria-label="Navigate to About section">About</a>
-        <a href="#tokenomics" class="nav-link px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-md transition-all duration-300" aria-label="Navigate to Tokenomics section">Tokenomics</a>
-        <a href="#why-buy" class="nav-link px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300" aria-label="Navigate to Why Buy section">Why Buy</a>
+      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Bring Back VC</h1>
+      <button class="hamburger-menu sm:hidden text-gray-300 focus:outline-none" aria-label="Toggle navigation menu">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+      <nav class="nav-menu flex space-x-1 items-center sm:space-x-2">
+        <a href="#studio" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to Studio section">Studio</a>
+        <a href="#archive" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to Archive section">Archive</a>
+        <a href="#about" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to About section">About</a>
+        <a href="#tokenomics" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to Tokenomics section">Tokenomics</a>
+        <a href="#why-buy" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to Why Buy section">Why Buy</a>
       </nav>
     </header>
 
     <!-- Studio Section -->
-    <section id="studio" class="flex-1 relative pt-24 bg-gray-900">
-      <div class="max-w-6xl mx-auto py-12 px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Welcome to our Studio</h2>
-          <p class="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive studio for voice-driven collaboration.</p>
-          <p class="text-lg text-gray-400 mt-4">Contract Address: 
-            <span id="contract-address" class="text-blue-400 cursor-pointer relative group" onclick="copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump')" title="Click to copy">
+    <section id="studio" class="flex-1 relative pt-20 sm:pt-24 bg-gray-900">
+      <div class="max-w-6xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Welcome to our studio</h2>
+          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive 2D studio for voice-driven collaboration.</p>
+          <p class="text-sm sm:text-lg text-gray-400 mt-4">Contract Address: 
+            <span id="contract-address" class="text-blue-400 cursor-pointer relative group" onclick="copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump')" title="Click to copy" role="button" tabindex="0">
               3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump
               <span class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs rounded py-1 px-2">Click to copy</span>
             </span>
           </p>
         </div>
-        <div id="canvas-container" class="w-full h-[60vh] rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm">
+        <div id="canvas-container" class="w-full h-[40vh] sm:h-[60vh] rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm">
           <canvas id="studio-canvas" class="w-full h-full"></canvas>
         </div>
         <!-- Voice Recording Controls -->
-        <div class="mt-8 bg-gradient-to-br from-blue-900/50 to-blue-800/50 border border-blue-700 rounded-xl p-6">
-          <h3 class="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Voice Recording Studio</h3>
+        <div class="mt-6 sm:mt-8 bg-gradient-to-br from-blue-900/50 to-blue-800/50 border border-blue-700 rounded-xl p-4 sm:p-6">
+          <h3 class="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Voice Recording Studio</h3>
           <div class="flex flex-col items-center space-y-4">
-            <div class="flex space-x-4">
-              <button id="record-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded disabled:opacity-50" disabled>Record</button>
-              <button id="stop-btn" class="bg-red-500 hover:bg-red-600 text-gray-900 font-bold py-2 px-6 rounded hidden">Stop</button>
-              <p id="record-status" class="text-sm text-gray-400 self-center"></p>
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-center">
+              <button id="record-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 sm:px-6 rounded disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-yellow-400" disabled>Record</button>
+              <button id="stop-btn" class="bg-red-500 hover:bg-red-600 text-gray-900 font-bold py-2 px-4 sm:px-6 rounded hidden focus:outline-none focus:ring-2 focus:ring-red-400">Stop</button>
+              <div class="flex items-center">
+                <p id="record-status" class="text-sm text-gray-400"></p>
+                <span id="loading-spinner" class="loading-spinner"></span>
+              </div>
             </div>
             <div id="effect-controls" class="flex flex-col space-y-4 w-full max-w-md hidden">
               <div>
                 <label for="effect-select" class="text-sm text-gray-300">Audio Effect</label>
-                <select id="effect-select" class="bg-gray-700 text-gray-200 p-2 rounded w-full">
+                <select id="effect-select" class="bg-gray-700 text-gray-200 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400">
                   <option value="none">No Effect</option>
                   <option value="reverb">Reverb</option>
                   <option value="pitch-up">Pitch Up</option>
@@ -82,12 +139,12 @@
               </div>
               <div>
                 <label for="recording-name" class="text-sm text-gray-300">Recording Name</label>
-                <input type="text" id="recording-name" placeholder="Enter recording name" class="bg-gray-700 text-gray-200 p-2 rounded w-full">
+                <input type="text" id="recording-name" placeholder="Enter recording name" class="bg-gray-700 text-gray-200 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400">
               </div>
-              <button id="save-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded">Save Recording</button>
+              <button id="save-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 sm:px-6 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400">Save Recording</button>
             </div>
             <div>
-              <label for="upload-audio" class="bg-blue-500 hover:bg-blue-600 text-gray-900 font-bold py-2 px-6 rounded cursor-pointer">Upload Audio</label>
+              <label for="upload-audio" class="bg-blue-500 hover:bg-blue-600 text-gray-900 font-bold py-2 px-4 sm:px-6 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400">Upload Audio</label>
               <input type="file" id="upload-audio" accept="audio/*" class="hidden">
             </div>
           </div>
@@ -96,75 +153,75 @@
     </section>
 
     <!-- Archive Section -->
-    <section id="archive" class="py-12 px-6 bg-gray-900">
+    <section id="archive" class="py-8 sm:py-12 px-4 sm:px-6 bg-gray-900">
       <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12">
-          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Voice Archive</h2>
-          <p class="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Explore and play back community voice recordings.</p>
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Voice Archive</h2>
+          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Explore and play back community voice recordings.</p>
         </div>
         <div class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm">
-          <div class="p-8">
-            <div id="recordings-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+          <div class="p-4 sm:p-8">
+            <div id="recordings-list" class="grid grid-cols-1 gap-4 sm:gap-6"></div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-12 px-6 bg-gray-900">
+    <section id="about" class="py-8 sm:py-12 px-4 sm:px-6 bg-gray-900">
       <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12">
-          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">About Bring Back VC</h2>
-          <p class="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">A vibrant project launched on Solana, reigniting the VC culture.</p>
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">About Bring Back VC</h2>
+          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">A vibrant project launched on Solana, reigniting the VC culture.</p>
         </div>
         <div class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm">
-          <div class="p-8 text-center">
-            <p class="text-gray-300">To be honest, I believe one of the key reasons we're not seeing the same momentum in the market is because we've lost sight of the human element behind it. A year ago, many of us would spend hours together in voice chats — sharing ideas, building trust, and strategizing with real people, not just usernames. Those connections created powerful communities that moved together with purpose. Now, without that direct interaction, it's become easier to disconnect emotionally — easier to sell, easier to walk away. We've lost more than just market energy; we've lost the sense of shared humanity that made this space thrive. It's time to bring back voice chats. Bring back real conversations. Because when we hear each other, we remember that there's a person behind every trade, and that’s what builds strong, lasting communities. BRING BACK $VC</p>
+          <div class="p-4 sm:p-8 text-center">
+            <p class="text-sm sm:text-base text-gray-300">To be honest, I believe one of the key reasons we're not seeing the same momentum in the market is because we've lost sight of the human element behind it. A year ago, many of us would spend hours together in voice chats — sharing ideas, building trust, and strategizing with real people, not just usernames. Those connections created powerful communities that moved together with purpose. Now, without that direct interaction, it's become easier to disconnect emotionally — easier to sell, easier to walk away. We've lost more than just market energy; we've lost the sense of shared humanity that made this space thrive. It's time to bring back voice chats. Bring back real conversations. Because when we hear each other, we remember that there's a person behind every trade, and that’s what builds strong, lasting communities. BRING BACK $VC</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Tokenomics Section -->
-    <section id="tokenomics" class="py-12 px-6 bg-gray-900">
+    <section id="tokenomics" class="py-8 sm:py-12 px-4 sm:px-6 bg-gray-900">
       <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12">
-          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Tokenomics</h2>
-          <p class="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Bring Back VC Token features a unique deflationary model designed for sustainable growth</p>
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Tokenomics</h2>
+          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Bring Back VC Token features a unique deflationary model designed for sustainable growth</p>
         </div>
-        <div class="grid md:grid-cols-3 gap-8 mb-12">
-          <div id="total-supply-card" class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm h-full transform transition-transform duration-300 hover:scale-105">
-            <div class="p-8 text-center">
-              <div class="text-4xl mb-4">🪙</div>
-              <h3 class="text-2xl font-bold mb-4 text-blue-400">Total Supply</h3>
-              <p class="text-3xl font-bold text-white mb-2">1 Billion</p>
-              <p class="text-gray-300">Fixed maximum supply ensures scarcity and value preservation</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 mb-8 sm:mb-12">
+          <div id="total-supply-card" class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm transform transition-transform duration-300 hover:scale-105">
+            <div class="p-4 sm:p-8 text-center">
+              <div class="text-3xl sm:text-4xl mb-4">🪙</div>
+              <h3 class="text-xl sm:text-2xl font-bold mb-4 text-blue-400">Total Supply</h3>
+              <p class="text-2xl sm:text-3xl font-bold text-white mb-2">1 Billion</p>
+              <p class="text-sm sm:text-base text-gray-300">Fixed maximum supply ensures scarcity and value preservation</p>
             </div>
           </div>
-          <div class="rounded-xl border bg-gradient-to-br from-red-900/50 to-orange-800/50 border-red-700 backdrop-blur-sm h-full">
-            <div class="p-8 text-center">
-              <div class="text-4xl mb-4">🔥</div>
-              <h3 class="text-2xl font-bold mb-4 text-red-400">Burn Mechanism</h3>
-              <p class="text-3xl font-bold text-white mb-2">1% Liquidity</p>
-              <p class="text-gray-300">Continuous burning creates deflationary pressure and increases value</p>
+          <div class="rounded-xl border bg-gradient-to-br from-red-900/50 to-orange-800/50 border-red-700 backdrop-blur-sm">
+            <div class="p-4 sm:p-8 text-center">
+              <div class="text-3xl sm:text-4xl mb-4">🔥</div>
+              <h3 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Burn Mechanism</h3>
+              <p class="text-2xl sm:text-3xl font-bold text-white mb-2">1% Liquidity</p>
+              <p class="text-sm sm:text-base text-gray-300">Continuous burning creates deflationary pressure and increases value</p>
             </div>
           </div>
-          <div class="rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm h-full">
-            <div class="p-8 text-center">
-              <div class="text-4xl mb-4">💸</div>
-              <h3 class="text-2xl font-bold mb-4 text-green-400">Zero Tax</h3>
-              <p class="text-3xl font-bold text-white mb-2">0% Fees</p>
-              <p class="text-gray-300">Seamless transactions without any additional costs or barriers</p>
+          <div class="rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm">
+            <div class="p-4 sm:p-8 text-center">
+              <div class="text-3xl sm:text-4xl mb-4">💸</div>
+              <h3 class="text-xl sm:text-2xl font-bold mb-4 text-green-400">Zero Tax</h3>
+              <p class="text-2xl sm:text-3xl font-bold text-white mb-2">0% Fees</p>
+              <p class="text-sm sm:text-base text-gray-300">Seamless transactions without any additional costs or barriers</p>
             </div>
           </div>
         </div>
         <div class="rounded-xl border bg-gradient-to-r from-purple-900/50 to-pink-900/50 border-purple-700 backdrop-blur-sm">
-          <div class="p-8">
-            <h3 class="text-2xl font-semibold mb-6 text-center text-white">Tokenomics Benefits</h3>
-            <div class="grid md:grid-cols-2 gap-8">
+          <div class="p-4 sm:p-8">
+            <h3 class="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-center text-white">Tokenomics Benefits</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
               <div>
-                <h4 class="text-lg font-semibold mb-3 text-purple-400">Deflationary Model</h4>
-                <ul class="space-y-2 text-gray-300">
+                <h4 class="text-base sm:text-lg font-semibold mb-3 text-purple-400">Deflationary Model</h4>
+                <ul class="space-y-2 text-sm sm:text-base text-gray-300">
                   <li>• 1% of liquidity burnt regularly</li>
                   <li>• Reduces total supply over time</li>
                   <li>• Creates upward price pressure</li>
@@ -172,8 +229,8 @@
                 </ul>
               </div>
               <div>
-                <h4 class="text-lg font-semibold mb-3 text-pink-400">Zero Tax Policy</h4>
-                <ul class="space-y-2 text-gray-300">
+                <h4 class="text-base sm:text-lg font-semibold mb-3 text-pink-400">Zero Tax Policy</h4>
+                <ul class="space-y-2 text-sm sm:text-base text-gray-300">
                   <li>• No buy or sell taxes</li>
                   <li>• Encourages active trading</li>
                   <li>• Seamless user experience</li>
@@ -183,61 +240,61 @@
             </div>
           </div>
         </div>
-        <div class="text-center mt-12">
-          <h3 class="text-3xl font-bold mb-4 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">Live Token Data</h3>
-          <p class="text-gray-400">Real-time market information</p>
+        <div class="text-center mt-8 sm:mt-12">
+          <h3 class="text-2xl sm:text-3xl font-bold mb-4 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">Live Token Data</h3>
+          <p class="text-sm sm:text-base text-gray-400">Real-time market information</p>
         </div>
-        <div class="grid md:grid-cols-4 gap-6 mt-8">
-          <div id="price-card" class="rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm transform transition-transform duration-300">
-            <div class="p-6 text-center">
-              <div class="text-2xl mb-2">💰</div>
-              <h4 class="text-lg font-semibold text-green-400 mb-2">Price</h4>
-              <p id="price" class="text-2xl font-bold text-white">$0.000000</p>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6 mt-6 sm:mt-8">
+          <div id="price-card" class="rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm transform transition-transform duration-300 hover:scale-105">
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-xl sm:text-2xl mb-2">💰</div>
+              <h4 class="text-base sm:text-lg font-semibold text-green-400 mb-2">Price</h4>
+              <p id="price" class="text-xl sm:text-2xl font-bold text-white">$0.000000</p>
             </div>
           </div>
           <div id="holders-card" class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-cyan-800/50 border-blue-700 backdrop-blur-sm">
-            <div class="p-6 text-center">
-              <div class="text-2xl mb-2">👥</div>
-              <h4 class="text-lg font-semibold text-blue-400 mb-2">Holders</h4>
-              <p id="holders" class="text-2xl font-bold text-white">1,677</p>
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-xl sm:text-2xl mb-2">👥</div>
+              <h4 class="text-base sm:text-lg font-semibold text-blue-400 mb-2">Holders</h4>
+              <p id="holders" class="text-xl sm:text-2xl font-bold text-white">1,677</p>
             </div>
           </div>
           <div class="rounded-xl border bg-gradient-to-br from-green-900/50 to-lime-800/50 border-green-700 backdrop-blur-sm">
-            <div class="p-6 text-center">
-              <div class="text-2xl mb-2">📈</div>
-              <h4 class="text-lg font-semibold text-green-400 mb-2">24h Change</h4>
-              <p id="price-change" class="text-2xl font-bold text-green-400">N/A</p>
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-xl sm:text-2xl mb-2">📈</div>
+              <h4 class="text-base sm:text-lg font-semibold text-green-400 mb-2">24h Change</h4>
+              <p id="price-change" class="text-xl sm:text-2xl font-bold text-green-400">N/A</p>
             </div>
           </div>
           <div class="rounded-xl border bg-gradient-to-br from-purple-900/50 to-indigo-800/50 border-purple-700 backdrop-blur-sm">
-            <div class="p-6 text-center">
-              <div class="text-2xl mb-2">📊</div>
-              <h4 class="text-lg font-semibold text-purple-400 mb-2">24h Volume</h4>
-              <p id="volume" class="text-2xl font-bold text-white">N/A</p>
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-xl sm:text-2xl mb-2">📊</div>
+              <h4 class="text-base sm:text-lg font-semibold text-purple-400 mb-2">24h Volume</h4>
+              <p id="volume" class="text-xl sm:text-2xl font-bold text-white">N/A</p>
             </div>
           </div>
         </div>
-        <div class="mt-6 text-center">
-          <p class="text-gray-400 text-sm">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
-          <p id="last-updated" class="text-gray-400 text-sm mt-2">Last updated: 06:51 AM, July 31, 2025</p>
-          <p class="text-gray-500 text-xs mt-1">Data refreshes every 30 seconds</p>
+        <div class="mt-4 sm:mt-6 text-center">
+          <p class="text-sm text-gray-400">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
+          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 07:30 AM, July 31, 2025</p>
+          <p class="text-xs text-gray-500 mt-1">Data refreshes every 30 seconds</p>
         </div>
       </div>
     </section>
 
     <!-- Why Buy Section -->
-    <section id="why-buy" class="py-12 px-6 bg-gray-900">
+    <section id="why-buy" class="py-8 sm:py-12 px-4 sm:px-6 bg-gray-900">
       <div class="max-w-6xl mx-auto">
-        <div class="text-center mb-12">
-          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Why Buy Bring Back VC</h2>
-          <p class="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Wondering why you should dive into the VC space? It's not just about the capital it's about embracing a culture of innovation, seizing unique opportunities, and joining a community that leads change. Here's why your next step should be VC.</p>
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Why Buy Bring Back VC</h2>
+          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Wondering why you should dive into the VC space? It's not just about the capital—it's about embracing a culture of innovation, seizing unique opportunities, and joining a community that leads change. Here's why your next step should be VC.</p>
         </div>
         <div class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm">
-          <div class="p-8">
-            <ul class="list-disc list-inside text-gray-300 space-y-2 max-w-2xl mx-auto">
+          <div class="p-4 sm:p-8">
+            <ul class="list-disc list-inside text-gray-300 space-y-2 max-w-2xl mx-auto text-sm sm:text-base">
               <li><strong class="text-blue-400">Opportunities 💼:</strong> Discover paths to financial gains, jobs, and referrals.</li>
               <li><strong class="text-blue-400">Networking 🔗:</strong> Meet new people and explore fresh projects or partnerships.</li>
-              <li><strong class="text-blue-400">Collaboration 🤝:</strong> Work together, share skills, and build amazing stuff as a Community.</li>
+              <li><strong class="text-blue-400">Collaboration 🤝:</strong> Work together, share skills, and build amazing stuff as a community.</li>
               <li><strong class="text-blue-400">Community 🫂:</strong> Be part of a welcoming space where voices matter.</li>
               <li><strong class="text-blue-400">Social Skills Boost 🎙️:</strong> Gain confidence and improve how you speak and connect.</li>
               <li><strong class="text-blue-400">Personal Growth 🌱:</strong> Learn new things and expand your perspective.</li>
@@ -248,19 +305,19 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 border-t border-gray-700/50 py-12 px-6">
+    <footer class="bg-gray-900 border-t border-gray-700/50 py-8 sm:py-12 px-4 sm:px-6">
       <div class="max-w-6xl mx-auto">
         <div class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm">
-          <div class="p-8 text-center">
-            <p class="text-gray-300">&copy; 2025 Bring Back VC. All rights reserved.</p>
-            <div class="mt-4 flex justify-center space-x-6">
-              <a href="https://t.me/join_vc" target="_blank" class="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300" aria-label="Join our Telegram community">
-                <i class="fab fa-telegram-plane text-lg"></i>
-                <span>Telegram</span>
+          <div class="p-4 sm:p-8 text-center">
+            <p class="text-sm sm:text-base text-gray-300">&copy; 2025 Bring Back VC. All rights reserved.</p>
+            <div class="mt-4 flex justify-center space-x-4 sm:space-x-6">
+              <a href="https://t.me/join_vc" target="_blank" class="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Join our Telegram community">
+                <i class="fab fa-telegram-plane text-base sm:text-lg"></i>
+                <span class="text-sm sm:text-base">Telegram</span>
               </a>
-              <a href="https://x.com/joinVC_cto" target="_blank" class="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300" aria-label="Follow us on X">
-                <i class="fab fa-x-twitter text-lg"></i>
-                <span>X</span>
+              <a href="https://x.com/joinVC_cto" target="_blank" class="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Follow us on X">
+                <i class="fab fa-x-twitter text-base sm:text-lg"></i>
+                <span class="text-sm sm:text-base">X</span>
               </a>
             </div>
           </div>
@@ -274,7 +331,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Firebase Configuration
       const firebaseConfig = {
-        // Replace with your Firebase project configuration
+        // Replace with your actual Firebase project configuration
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_AUTH_DOMAIN",
         projectId: "YOUR_PROJECT_ID",
@@ -285,24 +342,58 @@
 
       // Initialize Firebase
       if (typeof firebase !== 'undefined') {
-        firebase.initializeApp(firebaseConfig);
-        window.storage = firebase.storage();
+        try {
+          firebase.initializeApp(firebaseConfig);
+          window.storage = firebase.storage();
+          console.log('Firebase initialized successfully');
+        } catch (err) {
+          console.error('Firebase initialization failed:', err);
+          document.getElementById('record-status').textContent = 'Firebase initialization failed';
+        }
       } else {
         console.error('Firebase SDK not loaded. Please check the Firebase script inclusion.');
+        document.getElementById('record-status').textContent = 'Firebase SDK not loaded';
       }
+
+      // Hamburger Menu Toggle
+      const hamburger = document.querySelector('.hamburger-menu');
+      const navMenu = document.querySelector('.nav-menu');
+      hamburger.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        const icon = hamburger.querySelector('i');
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-times');
+        gsap.to(navMenu, {
+          height: navMenu.classList.contains('active') ? 'auto' : 0,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      });
+
+      // Close hamburger menu when clicking a nav link on mobile
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 640) {
+            navMenu.classList.remove('active');
+            hamburger.querySelector('i').classList.remove('fa-times');
+            hamburger.querySelector('i').classList.add('fa-bars');
+            gsap.to(navMenu, { height: 0, duration: 0.3, ease: 'power2.out' });
+          }
+        });
+      });
 
       // 2D Canvas Setup
       const canvas = document.getElementById('studio-canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight * 0.6;
-
-      // Load Background Image
+      function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = window.innerWidth <= 640 ? window.innerHeight * 0.4 : window.innerHeight * 0.6;
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+      }
       const bgImage = new Image();
       bgImage.src = 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=3600&q=80';
-      bgImage.onload = () => {
-        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-      };
+      bgImage.onload = resizeCanvas;
 
       // Animation Loop
       function animate() {
@@ -313,11 +404,7 @@
       animate();
 
       // Resize Handler
-      window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight * 0.6;
-        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-      });
+      window.addEventListener('resize', resizeCanvas);
 
       // Copy to Clipboard Function
       function copyToClipboard(text) {
@@ -329,11 +416,18 @@
           }, 2000);
         }).catch(err => {
           console.error('Failed to copy:', err);
+          document.getElementById('record-status').textContent = 'Failed to copy address';
         });
       }
 
+      // Keyboard support for contract address copy
+      document.getElementById('contract-address').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump');
+        }
+      });
+
       // Navigation Active State
-      const navLinks = document.querySelectorAll('.nav-link');
       function setActiveNavLink() {
         const scrollPosition = window.scrollY + 100;
         navLinks.forEach(link => {
@@ -364,12 +458,7 @@
               top: section.offsetTop - 80,
               behavior: 'smooth'
             });
-            navLinks.forEach(l => {
-              l.classList.remove('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
-              l.classList.add('text-gray-300');
-            });
-            link.classList.remove('text-gray-300');
-            link.classList.add('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+            setActiveNavLink();
           }
         });
       });
@@ -400,6 +489,7 @@
       const saveBtn = document.getElementById('save-btn');
       const uploadAudio = document.getElementById('upload-audio');
       const recordingsList = document.getElementById('recordings-list');
+      const loadingSpinner = document.getElementById('loading-spinner');
       let recordings = [];
 
       // Check Microphone Permission
@@ -547,9 +637,10 @@
 
       async function saveRecording() {
         if (!window.storage) {
-          recordStatus.textContent = 'Firebase not initialized';
+          recordStatus.textContent = 'Firebase not initialized. Please check configuration.';
           return;
         }
+        loadingSpinner.classList.add('active');
         const effect = effectSelect.value;
         const eqSettings = {
           low: parseFloat(eqLow.value),
@@ -575,14 +666,17 @@
         } catch (err) {
           recordStatus.textContent = 'Error saving recording to cloud';
           console.error('Firebase save error:', err);
+        } finally {
+          loadingSpinner.classList.remove('active');
         }
       }
 
       async function handleAudioUpload(file) {
         if (!window.storage) {
-          recordStatus.textContent = 'Firebase not initialized';
+          recordStatus.textContent = 'Firebase not initialized. Please check configuration.';
           return;
         }
+        loadingSpinner.classList.add('active');
         const reader = new FileReader();
         reader.onload = async () => {
           try {
@@ -599,6 +693,8 @@
           } catch (err) {
             recordStatus.textContent = 'Error processing uploaded audio';
             console.error('Upload error:', err);
+          } finally {
+            loadingSpinner.classList.remove('active');
           }
         };
         reader.readAsArrayBuffer(file);
@@ -608,17 +704,17 @@
         const recording = { name, url, id: Date.now(), fileName };
         recordings.push(recording);
         const recordingDiv = document.createElement('div');
-        recordingDiv.className = 'p-6 bg-gradient-to-br from-blue-900/70 to-purple-900/70 border border-blue-700 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl';
+        recordingDiv.className = 'p-4 sm:p-6 bg-gradient-to-br from-blue-900/70 to-purple-900/70 border border-blue-700 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-xl';
         recordingDiv.innerHTML = `
           <div class="flex flex-col space-y-4">
             <div class="flex items-center space-x-4">
-              <i class="fas fa-microphone-alt text-2xl text-yellow-400"></i>
-              <span class="text-lg font-semibold text-gray-200">${name}</span>
+              <i class="fas fa-microphone-alt text-xl sm:text-2xl text-yellow-400"></i>
+              <span class="text-base sm:text-lg font-semibold text-gray-200">${name}</span>
             </div>
             <audio controls src="${url}" class="w-full rounded-lg bg-gray-800/50 accent-blue-500"></audio>
             <div class="flex justify-end space-x-2">
-              <button class="rename-btn bg-blue-500 hover:bg-blue-600 text-gray-900 py-1 px-3 rounded text-sm font-medium" data-id="${recording.id}" data-filename="${fileName}">Rename</button>
-              <button class="delete-btn bg-red-500 hover:bg-red-600 text-gray-900 py-1 px-3 rounded text-sm font-medium" data-id="${recording.id}" data-filename="${fileName}">Delete</button>
+              <button class="rename-btn bg-blue-500 hover:bg-blue-600 text-gray-900 py-1 px-3 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${recording.id}" data-filename="${fileName}">Rename</button>
+              <button class="delete-btn bg-red-500 hover:bg-red-600 text-gray-900 py-1 px-3 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400" data-id="${recording.id}" data-filename="${fileName}">Delete</button>
             </div>
           </div>
         `;
@@ -628,8 +724,10 @@
       async function loadRecordings() {
         if (!window.storage) {
           console.error('Firebase storage not initialized');
+          document.getElementById('record-status').textContent = 'Firebase not initialized. Please check configuration.';
           return;
         }
+        loadingSpinner.classList.add('active');
         try {
           const storageRef = window.storage.ref('recordings');
           const listResult = await storageRef.listAll();
@@ -642,6 +740,9 @@
           }
         } catch (err) {
           console.error('Error loading recordings:', err);
+          document.getElementById('record-status').textContent = 'Error loading recordings';
+        } finally {
+          loadingSpinner.classList.remove('active');
         }
       }
 
@@ -658,6 +759,7 @@
       recordingsList.addEventListener('click', async (e) => {
         if (!window.storage) {
           console.error('Firebase storage not initialized');
+          document.getElementById('record-status').textContent = 'Firebase not initialized. Please check configuration.';
           return;
         }
         if (e.target.classList.contains('rename-btn')) {
@@ -667,6 +769,7 @@
           if (recording) {
             const newName = prompt('Enter new name for the recording:', recording.name);
             if (newName) {
+              loadingSpinner.classList.add('active');
               try {
                 const oldRef = window.storage.ref(`recordings/${fileName}`);
                 const blob = await (await fetch(recording.url)).blob();
@@ -682,20 +785,29 @@
                 recordingDiv.querySelector('audio').src = recording.url;
                 recordingDiv.querySelector('.rename-btn').dataset.filename = newFileName;
                 recordingDiv.querySelector('.delete-btn').dataset.filename = newFileName;
+                document.getElementById('record-status').textContent = 'Recording renamed';
               } catch (err) {
                 console.error('Error renaming recording:', err);
+                document.getElementById('record-status').textContent = 'Error renaming recording';
+              } finally {
+                loadingSpinner.classList.remove('active');
               }
             }
           }
         } else if (e.target.classList.contains('delete-btn')) {
           const id = parseInt(e.target.dataset.id);
           const fileName = e.target.dataset.filename;
+          loadingSpinner.classList.add('active');
           try {
             await window.storage.ref(`recordings/${fileName}`).delete();
             recordings = recordings.filter(r => r.id !== id);
             e.target.closest('div').remove();
+            document.getElementById('record-status').textContent = 'Recording deleted';
           } catch (err) {
             console.error('Error deleting recording:', err);
+            document.getElementById('record-status').textContent = 'Error deleting recording';
+          } finally {
+            loadingSpinner.classList.remove('active');
           }
         }
       });
