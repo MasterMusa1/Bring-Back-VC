@@ -6,6 +6,7 @@
   <title>Bring Back VC - Immersive Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1440.0.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
     html {
@@ -67,7 +68,7 @@
 <body class="bg-gray-900 text-gray-200 font-serif">
   <!-- Welcome Pop-up -->
   <div id="welcome-popup" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 px-4">
-    <div class="bg-gray-800 p-6 sm:p-8 rounded-lg text-center max-w-md w-full">
+    <div class="bg-gray-800 p-6 sm acceptable:p-8 rounded-lg text-center max-w-md w-full">
       <h2 class="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4">Welcome to Bring Back VC</h2>
       <p class="mb-6 text-gray-300 text-sm sm:text-base">Click to join the community!</p>
       <button id="join-now-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400">Join Now</button>
@@ -280,7 +281,7 @@
         </div>
         <div class="mt-4 sm:mt-6 text-center">
           <p class="text-sm text-gray-400">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
-          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 01:37 AM, August 01, 2025</p>
+          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 02:33 AM, August 01, 2025</p>
           <p class="text-xs text-gray-500 mt-1">Data refreshes every 30 seconds</p>
         </div>
       </div>
@@ -375,6 +376,15 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Backend URL (replace with your deployed backend URL)
       const BACKEND_URL = 'http://localhost:3000'; // Update to https://your-backend-domain.com
+
+      // AWS Configuration
+      AWS.config.update({
+        region: 'ap-southeast-2',
+        credentials: new AWS.CognitoIdentityCredentials({
+          IdentityPoolId: 'ap-southeast-2:418d81e2-33a7-4795-a681-5657e5b7c9c7'
+        })
+      });
+      const s3 = new AWS.S3({ region: 'ap-southeast-1' });
 
       // Hamburger Menu Toggle
       const hamburger = document.querySelector('.hamburger-menu');
@@ -691,11 +701,15 @@
         const name = recordingNameInput.value.trim() || `Recording_${new Date().toLocaleString()}`;
         const processedBuffer = await applyAudioEffect(recordedBuffer, effect, eqSettings);
         const blob = await audioBufferToWav(processedBuffer);
+        const fileName = `recordings/${name}_${Date.now()}.wav`;
         try {
-          const response = await fetch(`${BACKEND_URL}/presigned-url?name=${encodeURIComponent(name)}`);
-          const { url, fileName } = await response.json();
-          if (!url) throw new Error('Failed to get pre-signed URL');
-          await fetch(url, { method: 'PUT', body: blob, headers: { 'Content-Type': 'audio/wav' } });
+          await s3.upload({
+            Bucket: 'bringbackvc',
+            Key: fileName,
+            Body: blob,
+            ContentType: 'audio/wav',
+            ACL: 'public-read'
+          }).promise();
           const publicUrl = `https://bringbackvc.s3-ap-southeast-1.amazonaws.com/${fileName}`;
           addRecordingToArchive(name, publicUrl, fileName);
           effectControls.classList.add('hidden');
@@ -722,10 +736,14 @@
             const arrayBuffer = reader.result;
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
             const blob = await audioBufferToWav(audioBuffer);
-            const response = await fetch(`${BACKEND_URL}/presigned-url?name=${encodeURIComponent(name)}`);
-            const { url, fileName } = await response.json();
-            if (!url) throw new Error('Failed to get pre-signed URL');
-            await fetch(url, { method: 'PUT', body: blob, headers: { 'Content-Type': 'audio/wav' } });
+            const fileName = `recordings/${name}_${Date.now()}.wav`;
+            await s3.upload({
+              Bucket: 'bringbackvc',
+              Key: fileName,
+              Body: blob,
+              ContentType: 'audio/wav',
+              ACL: 'public-read'
+            }).promise();
             const publicUrl = `https://bringbackvc.s3-ap-southeast-1.amazonaws.com/${fileName}`;
             addRecordingToArchive(name, publicUrl, fileName);
             recordStatus.textContent = 'Audio uploaded and saved to cloud!';
@@ -847,7 +865,16 @@
         }
       });
 
-      window.addEventListener('load', loadRecordings);
+      window.addEventListener('load', () => {
+        AWS.config.credentials.get(err => {
+          if (err) {
+            console.error('Error retrieving Cognito credentials:', err);
+            recordStatus.textContent = 'Error initializing cloud access';
+          } else {
+            loadRecordings();
+          }
+        });
+      });
 
       // Social Icons Heartbeat Animation
       const socialLinks = document.querySelectorAll('.social-popup');
@@ -897,14 +924,14 @@
           document.getElementById('holders').textContent = holders.toLocaleString();
           document.getElementById('price-change').textContent = priceChange;
           document.getElementById('volume').textContent = volume;
-          document.getElementById('last-updated').textContent = `Last updated: 01:37 AM, August 01, 2025`;
+          document.getElementById('last-updated').textContent = `Last updated: 02:33 AM, August 01, 2025`;
         } catch (err) {
           console.error('Error fetching crypto data:', err.message);
           document.getElementById('price').textContent = '$0.000000';
           document.getElementById('holders').textContent = '1,677';
           document.getElementById('price-change').textContent = 'N/A';
           document.getElementById('volume').textContent = 'N/A';
-          document.getElementById('last-updated').textContent = `Last updated: 01:37 AM, August 01, 2025`;
+          document.getElementById('last-updated').textContent = `Last updated: 02:33 AM, August 01, 2025`;
         }
         setTimeout(updateCryptoData, 30000);
       }
