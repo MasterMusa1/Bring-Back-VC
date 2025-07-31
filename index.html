@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bring Back VC - Bring Back VC</title>
+  <title>Bring Back VC - Immersive Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1470.0.min.js"></script>
   <style>
-    /* Custom styles for mobile hamburger menu, audio player, and social icon animations */
+    html {
+      scroll-behavior: smooth;
+    }
     .hamburger-menu {
       display: none;
     }
@@ -76,7 +77,7 @@
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-black/20 backdrop-blur-md border-b border-gray-700/50 p-4 flex justify-between items-center fixed w-full z-40">
-      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent"></h1>
+      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">$VC</h1>
       <button class="hamburger-menu sm:hidden text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Toggle navigation menu">
         <i class="fas fa-bars text-2xl"></i>
       </button>
@@ -94,7 +95,7 @@
     <section id="studio" class="flex-1 relative pt-20 sm:pt-24 bg-gray-900">
       <div class="max-w-6xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
         <div class="text-center mb-8 sm:mb-12">
-          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">You are welcome to the $VC Culture</h2>
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">You are welcome to the VC Culture</h2>
           <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive studio for voice-driven collaboration.</p>
           <p class="text-sm sm:text-lg text-gray-400 mt-4">Contract Address: 
             <span id="contract-address" class="text-blue-400 cursor-pointer relative group" onclick="copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump')" title="Click to copy" role="button" tabindex="0">
@@ -279,7 +280,7 @@
         </div>
         <div class="mt-4 sm:mt-6 text-center">
           <p class="text-sm text-gray-400">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
-          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 12:56 PM, July 31, 2025</p>
+          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 01:37 AM, August 01, 2025</p>
           <p class="text-xs text-gray-500 mt-1">Data refreshes every 30 seconds</p>
         </div>
       </div>
@@ -370,15 +371,10 @@
   </div>
 
   <script>
-    // Wait for AWS SDK to load before initializing
+    // Wait for DOM to load
     document.addEventListener('DOMContentLoaded', () => {
-      // AWS Configuration
-      AWS.config.update({
-        region: 'us-east-1',
-        credentials: new AWS.Credentials('AKIA374SFKKL4GIRNWES', '8s15bxWiv7knBAcJi1RTJZab+pHB6PdHifacSeSB')
-      });
-      const s3 = new AWS.S3();
-      const bucketName = 'bringbackvc';
+      // Backend URL (replace with your deployed backend URL)
+      const BACKEND_URL = 'http://localhost:3000'; // Update to https://your-backend-domain.com
 
       // Hamburger Menu Toggle
       const hamburger = document.querySelector('.hamburger-menu');
@@ -404,7 +400,7 @@
           const sectionId = link.getAttribute('href').substring(1);
           const section = document.getElementById(sectionId);
           if (section) {
-            const sectionTop = section.offsetTop - 64; // Adjust for fixed header
+            const sectionTop = section.offsetTop - 64;
             const sectionHeight = section.offsetHeight;
             if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
               activeSection = link;
@@ -445,33 +441,27 @@
                 gsap.to(navMenu, { height: 0, duration: 0.3, ease: 'power2.out' });
               }
             };
-
             closeMenu();
-            setTimeout(() => {
-              window.scrollTo({
-                top: section.offsetTop - 64,
-                behavior: 'smooth'
-              });
-              setActiveNavLink();
-            }, window.innerWidth <= 640 ? 300 : 0);
+            window.scrollTo({
+              top: section.offsetTop - 64,
+              behavior: 'smooth'
+            });
+            setActiveNavLink();
           }
         });
       });
 
-      // Handle initial page load with URL hash
       window.addEventListener('load', () => {
         const hash = window.location.hash;
         if (hash) {
           const sectionId = hash.substring(1);
           const section = document.getElementById(sectionId);
           if (section) {
-            setTimeout(() => {
-              window.scrollTo({
-                top: section.offsetTop - 64,
-                behavior: 'smooth'
-              });
-              setActiveNavLink();
-            }, 100);
+            window.scrollTo({
+              top: section.offsetTop - 64,
+              behavior: 'smooth'
+            });
+            setActiveNavLink();
           }
         }
         setActiveNavLink();
@@ -489,6 +479,7 @@
       }
       const bgImage = new Image();
       bgImage.src = 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=3600&q=80';
+      bgImage.crossOrigin = 'anonymous';
       bgImage.onload = resizeCanvas;
 
       // Animation Loop
@@ -499,10 +490,9 @@
       }
       animate();
 
-      // Resize Handler
       window.addEventListener('resize', resizeCanvas);
 
-      // Copy to Clipboard Function
+      // Copy to Clipboard
       function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
           const tooltip = document.getElementById('copy-tooltip');
@@ -518,7 +508,6 @@
         });
       }
 
-      // Keyboard support for contract address copy
       document.getElementById('contract-address').addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump');
@@ -551,7 +540,6 @@
       const loadingSpinner = document.getElementById('loading-spinner');
       let recordings = [];
 
-      // Check Microphone Permission
       async function checkMicPermission() {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -609,7 +597,6 @@
 
         let lastNode = source;
 
-        // Apply Equalizer
         const lowFilter = offlineCtx.createBiquadFilter();
         lowFilter.type = 'lowshelf';
         lowFilter.frequency.setValueAtTime(300, offlineCtx.currentTime);
@@ -631,7 +618,6 @@
         lastNode.connect(highFilter);
         lastNode = highFilter;
 
-        // Apply Effect
         if (effect === 'reverb') {
           const convolver = offlineCtx.createConvolver();
           const impulse = createImpulseResponse(offlineCtx, 2, 0.5);
@@ -701,25 +687,17 @@
         }
         loadingSpinner.classList.add('active');
         const effect = effectSelect.value;
-        const eqSettings = {
-          low: parseFloat(eqLow.value),
-          mid: parseFloat(eqMid.value),
-          high: parseFloat(eqHigh.value)
-        };
+        const eqSettings = { low: parseFloat(eqLow.value), mid: parseFloat(eqMid.value), high: parseFloat(eqHigh.value) };
         const name = recordingNameInput.value.trim() || `Recording_${new Date().toLocaleString()}`;
         const processedBuffer = await applyAudioEffect(recordedBuffer, effect, eqSettings);
         const blob = await audioBufferToWav(processedBuffer);
-        const fileName = `recordings/${name}_${Date.now()}.wav`;
         try {
-          await s3.upload({
-            Bucket: bucketName,
-            Key: fileName,
-            Body: blob,
-            ContentType: 'audio/wav',
-            ACL: 'public-read'
-          }).promise();
-          const url = `https://${bucketName}.s3.amazonaws.com/${fileName}`;
-          addRecordingToArchive(name, url, fileName);
+          const response = await fetch(`${BACKEND_URL}/presigned-url?name=${encodeURIComponent(name)}`);
+          const { url, fileName } = await response.json();
+          if (!url) throw new Error('Failed to get pre-signed URL');
+          await fetch(url, { method: 'PUT', body: blob, headers: { 'Content-Type': 'audio/wav' } });
+          const publicUrl = `https://bringbackvc.s3-ap-southeast-1.amazonaws.com/${fileName}`;
+          addRecordingToArchive(name, publicUrl, fileName);
           effectControls.classList.add('hidden');
           recordStatus.textContent = 'Recording saved to cloud!';
           recordingNameInput.value = '';
@@ -737,7 +715,6 @@
 
       async function handleAudioUpload(file) {
         const name = prompt('Enter a name for the uploaded audio:', file.name) || file.name;
-        const fileName = `recordings/${name}_${Date.now()}.wav`;
         loadingSpinner.classList.add('active');
         const reader = new FileReader();
         reader.onload = async () => {
@@ -745,18 +722,15 @@
             const arrayBuffer = reader.result;
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
             const blob = await audioBufferToWav(audioBuffer);
-            await s3.upload({
-              Bucket: bucketName,
-              Key: fileName,
-              Body: blob,
-              ContentType: 'audio/wav',
-              ACL: 'public-read'
-            }).promise();
-            const url = `https://${bucketName}.s3.amazonaws.com/${fileName}`;
-            addRecordingToArchive(name, url, fileName);
+            const response = await fetch(`${BACKEND_URL}/presigned-url?name=${encodeURIComponent(name)}`);
+            const { url, fileName } = await response.json();
+            if (!url) throw new Error('Failed to get pre-signed URL');
+            await fetch(url, { method: 'PUT', body: blob, headers: { 'Content-Type': 'audio/wav' } });
+            const publicUrl = `https://bringbackvc.s3-ap-southeast-1.amazonaws.com/${fileName}`;
+            addRecordingToArchive(name, publicUrl, fileName);
             recordStatus.textContent = 'Audio uploaded and saved to cloud!';
           } catch (err) {
-            recordStatus.textContent = 'Error processing uploaded audio';
+            recordStatus.textContent = 'Error saving audio to cloud';
             console.error('S3 upload error:', err);
           } finally {
             loadingSpinner.classList.remove('active');
@@ -789,22 +763,14 @@
       async function loadRecordings() {
         loadingSpinner.classList.add('active');
         try {
-          const result = await s3.listObjectsV2({
-            Bucket: bucketName,
-            Prefix: 'recordings/'
-          }).promise();
+          const response = await fetch(`${BACKEND_URL}/list-recordings`);
+          const fetchedRecordings = await response.json();
           recordingsList.innerHTML = '';
           recordings = [];
-          if (result.Contents) {
-            for (const item of result.Contents) {
-              const name = item.Key.split('/').pop().split('_').slice(0, -1).join('_') || 'Unnamed Recording';
-              const url = `https://${bucketName}.s3.amazonaws.com/${item.Key}`;
-              addRecordingToArchive(name, url, item.Key);
-            }
-          }
+          fetchedRecordings.forEach(item => addRecordingToArchive(item.name, item.url, item.fileName));
         } catch (err) {
           console.error('Error loading recordings:', err);
-          recordStatus.textContent = 'Error loading recordings';
+          recordStatus.textContent = 'Error loading recordings from cloud';
         } finally {
           loadingSpinner.classList.remove('active');
         }
@@ -820,23 +786,18 @@
             if (newName) {
               loadingSpinner.classList.add('active');
               try {
-                const newFileName = `recordings/${newName}_${Date.now()}.wav`;
-                await s3.copyObject({
-                  Bucket: bucketName,
-                  CopySource: `${bucketName}/${fileName}`,
-                  Key: newFileName,
-                  ACL: 'public-read'
-                }).promise();
-                await s3.deleteObject({
-                  Bucket: bucketName,
-                  Key: fileName
-                }).promise();
+                const response = await fetch(`${BACKEND_URL}/rename-recording`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ oldFileName: fileName, newName })
+                });
+                const { url, fileName: newFileName } = await response.json();
                 recording.name = newName;
                 recording.fileName = newFileName;
-                recording.url = `https://${bucketName}.s3.amazonaws.com/${newFileName}`;
+                recording.url = url;
                 const recordingDiv = e.target.closest('div');
                 recordingDiv.querySelector('span').textContent = newName;
-                recordingDiv.querySelector('audio').src = recording.url;
+                recordingDiv.querySelector('audio').src = url;
                 recordingDiv.querySelector('.rename-btn').dataset.filename = newFileName;
                 recordingDiv.querySelector('.delete-btn').dataset.filename = newFileName;
                 recordStatus.textContent = 'Recording renamed';
@@ -853,10 +814,11 @@
           const fileName = e.target.dataset.filename;
           loadingSpinner.classList.add('active');
           try {
-            await s3.deleteObject({
-              Bucket: bucketName,
-              Key: fileName
-            }).promise();
+            await fetch(`${BACKEND_URL}/delete-recording`, {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fileName })
+            });
             recordings = recordings.filter(r => r.id !== id);
             e.target.closest('div').remove();
             recordStatus.textContent = 'Recording deleted';
@@ -885,7 +847,6 @@
         }
       });
 
-      // Load recordings on page load
       window.addEventListener('load', loadRecordings);
 
       // Social Icons Heartbeat Animation
@@ -936,14 +897,14 @@
           document.getElementById('holders').textContent = holders.toLocaleString();
           document.getElementById('price-change').textContent = priceChange;
           document.getElementById('volume').textContent = volume;
-          document.getElementById('last-updated').textContent = `Last updated: 12:56 PM, July 31, 2025`;
+          document.getElementById('last-updated').textContent = `Last updated: 01:37 AM, August 01, 2025`;
         } catch (err) {
           console.error('Error fetching crypto data:', err.message);
           document.getElementById('price').textContent = '$0.000000';
           document.getElementById('holders').textContent = '1,677';
           document.getElementById('price-change').textContent = 'N/A';
           document.getElementById('volume').textContent = 'N/A';
-          document.getElementById('last-updated').textContent = `Last updated: 12:56 PM, July 31, 2025`;
+          document.getElementById('last-updated').textContent = `Last updated: 01:37 AM, August 01, 2025`;
         }
         setTimeout(updateCryptoData, 30000);
       }
