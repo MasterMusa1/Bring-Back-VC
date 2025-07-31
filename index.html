@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bring Back VC - Immersive Studio</title>
+  <title>Bring Back VC - Bring Back VC</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -76,7 +76,7 @@
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-black/20 backdrop-blur-md border-b border-gray-700/50 p-4 flex justify-between items-center fixed w-full z-40">
-      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">$VC</h1>
+      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent"></h1>
       <button class="hamburger-menu sm:hidden text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Toggle navigation menu">
         <i class="fas fa-bars text-2xl"></i>
       </button>
@@ -94,7 +94,7 @@
     <section id="studio" class="flex-1 relative pt-20 sm:pt-24 bg-gray-900">
       <div class="max-w-6xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
         <div class="text-center mb-8 sm:mb-12">
-          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">You are welcome to the VC Culture</h2>
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">You are welcome to the $VC Culture</h2>
           <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive studio for voice-driven collaboration.</p>
           <p class="text-sm sm:text-lg text-gray-400 mt-4">Contract Address: 
             <span id="contract-address" class="text-blue-400 cursor-pointer relative group" onclick="copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump')" title="Click to copy" role="button" tabindex="0">
@@ -279,7 +279,7 @@
         </div>
         <div class="mt-4 sm:mt-6 text-center">
           <p class="text-sm text-gray-400">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
-          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 12:17 PM, July 31, 2025</p>
+          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 12:56 PM, July 31, 2025</p>
           <p class="text-xs text-gray-500 mt-1">Data refreshes every 30 seconds</p>
         </div>
       </div>
@@ -318,7 +318,7 @@
           <div class="token-card rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-6 text-center">
               <div class="text-3xl sm:text-4xl mb-4">👜</div>
-              <h3 class="text-xl282 sm:text-2xl font-bold mb-4 text-blue-400">Create a Wallet</h3>
+              <h3 class="text-xl sm:text-2xl font-bold mb-4 text-blue-400">Create a Wallet</h3>
               <p class="text-sm sm:text-base text-gray-300">Get started by downloading and setting up a Solana wallet, like Phantom, to securely store your tokens.</p>
             </div>
           </div>
@@ -374,8 +374,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       // AWS Configuration
       AWS.config.update({
-        region: 'us-east-1', // Update if your bucket is in a different region
-        credentials: new AWS.Credentials('YOUR_ACCESS_KEY_ID', 'YOUR_SECRET_ACCESS_KEY')
+        region: 'us-east-1',
+        credentials: new AWS.Credentials('AKIA374SFKKL4GIRNWES', '8s15bxWiv7knBAcJi1RTJZab+pHB6PdHifacSeSB')
       });
       const s3 = new AWS.S3();
       const bucketName = 'bringbackvc';
@@ -936,14 +936,14 @@
           document.getElementById('holders').textContent = holders.toLocaleString();
           document.getElementById('price-change').textContent = priceChange;
           document.getElementById('volume').textContent = volume;
-          document.getElementById('last-updated').textContent = `Last updated: 12:17 PM, July 31, 2025`;
+          document.getElementById('last-updated').textContent = `Last updated: 12:56 PM, July 31, 2025`;
         } catch (err) {
           console.error('Error fetching crypto data:', err.message);
           document.getElementById('price').textContent = '$0.000000';
           document.getElementById('holders').textContent = '1,677';
           document.getElementById('price-change').textContent = 'N/A';
           document.getElementById('volume').textContent = 'N/A';
-          document.getElementById('last-updated').textContent = `Last updated: 12:17 PM, July 31, 2025`;
+          document.getElementById('last-updated').textContent = `Last updated: 12:56 PM, July 31, 2025`;
         }
         setTimeout(updateCryptoData, 30000);
       }
