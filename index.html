@@ -74,8 +74,8 @@
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-black/20 backdrop-blur-md border-b border-gray-700/50 p-4 flex justify-between items-center fixed w-full z-40">
-      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Bring Back VC</h1>
-      <button class="hamburger-menu sm:hidden text-gray-300 focus:outline-none" aria-label="Toggle navigation menu">
+      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">$VC</h1>
+      <button class="hamburger-menu sm:hidden text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Toggle navigation menu">
         <i class="fas fa-bars text-2xl"></i>
       </button>
       <nav class="nav-menu flex space-x-1 items-center sm:space-x-2">
@@ -91,8 +91,8 @@
     <section id="studio" class="flex-1 relative pt-20 sm:pt-24 bg-gray-900">
       <div class="max-w-6xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
         <div class="text-center mb-8 sm:mb-12">
-          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Welcome to our studio</h2>
-          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive 2D studio for voice-driven collaboration.</p>
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">You are welcome to the VC Cultue</h2>
+          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive studio for voice-driven collaboration.</p>
           <p class="text-sm sm:text-lg text-gray-400 mt-4">Contract Address: 
             <span id="contract-address" class="text-blue-400 cursor-pointer relative group" onclick="copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump')" title="Click to copy" role="button" tabindex="0">
               3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump
@@ -276,7 +276,7 @@
         </div>
         <div class="mt-4 sm:mt-6 text-center">
           <p class="text-sm text-gray-400">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
-          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 07:30 AM, July 31, 2025</p>
+          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 07:48 AM, July 31, 2025</p>
           <p class="text-xs text-gray-500 mt-1">Data refreshes every 30 seconds</p>
         </div>
       </div>
@@ -370,18 +370,89 @@
         });
       });
 
-      // Close hamburger menu when clicking a nav link on mobile
+      // Navigation Active State and Smooth Scrolling
       const navLinks = document.querySelectorAll('.nav-link');
+      function setActiveNavLink() {
+        const scrollPosition = window.scrollY + 100;
+        let activeSection = null;
+        navLinks.forEach(link => {
+          const sectionId = link.getAttribute('href').substring(1);
+          const section = document.getElementById(sectionId);
+          if (section) {
+            const sectionTop = section.offsetTop - 64; // Adjust for fixed header
+            const sectionHeight = section.offsetHeight;
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+              activeSection = link;
+            }
+          }
+        });
+
+        navLinks.forEach(link => {
+          link.classList.remove('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+          link.classList.add('text-gray-300');
+          link.setAttribute('aria-current', 'false');
+        });
+
+        if (activeSection) {
+          activeSection.classList.remove('text-gray-300');
+          activeSection.classList.add('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+          activeSection.setAttribute('aria-current', 'page');
+          gsap.to(activeSection, {
+            scale: 1.05,
+            duration: 0.3,
+            ease: 'power2.out',
+            onComplete: () => gsap.to(activeSection, { scale: 1, duration: 0.2 })
+          });
+        }
+      }
+
       navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          if (window.innerWidth <= 640) {
-            navMenu.classList.remove('active');
-            hamburger.querySelector('i').classList.remove('fa-times');
-            hamburger.querySelector('i').classList.add('fa-bars');
-            gsap.to(navMenu, { height: 0, duration: 0.3, ease: 'power2.out' });
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const sectionId = link.getAttribute('href').substring(1);
+          const section = document.getElementById(sectionId);
+          if (section) {
+            const closeMenu = () => {
+              if (window.innerWidth <= 640 && navMenu.classList.contains('active')) {
+                navMenu.classList.remove('active');
+                hamburger.querySelector('i').classList.remove('fa-times');
+                hamburger.querySelector('i').classList.add('fa-bars');
+                gsap.to(navMenu, { height: 0, duration: 0.3, ease: 'power2.out' });
+              }
+            };
+
+            closeMenu();
+            setTimeout(() => {
+              window.scrollTo({
+                top: section.offsetTop - 64, // Adjust for fixed header
+                behavior: 'smooth'
+              });
+              setActiveNavLink();
+            }, window.innerWidth <= 640 ? 300 : 0); // Delay for mobile menu animation
           }
         });
       });
+
+      // Handle initial page load with URL hash
+      window.addEventListener('load', () => {
+        const hash = window.location.hash;
+        if (hash) {
+          const sectionId = hash.substring(1);
+          const section = document.getElementById(sectionId);
+          if (section) {
+            setTimeout(() => {
+              window.scrollTo({
+                top: section.offsetTop - 64,
+                behavior: 'smooth'
+              });
+              setActiveNavLink();
+            }, 100);
+          }
+        }
+        setActiveNavLink();
+      });
+
+      window.addEventListener('scroll', setActiveNavLink);
 
       // 2D Canvas Setup
       const canvas = document.getElementById('studio-canvas');
@@ -426,45 +497,6 @@
           copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump');
         }
       });
-
-      // Navigation Active State
-      function setActiveNavLink() {
-        const scrollPosition = window.scrollY + 100;
-        navLinks.forEach(link => {
-          const sectionId = link.getAttribute('href').substring(1);
-          const section = document.getElementById(sectionId);
-          if (section) {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-              navLinks.forEach(l => {
-                l.classList.remove('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
-                l.classList.add('text-gray-300');
-              });
-              link.classList.remove('text-gray-300');
-              link.classList.add('text-white', 'bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
-            }
-          }
-        });
-      }
-
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const sectionId = link.getAttribute('href').substring(1);
-          const section = document.getElementById(sectionId);
-          if (section) {
-            window.scrollTo({
-              top: section.offsetTop - 80,
-              behavior: 'smooth'
-            });
-            setActiveNavLink();
-          }
-        });
-      });
-
-      window.addEventListener('scroll', setActiveNavLink);
-      window.addEventListener('load', setActiveNavLink);
 
       // Welcome Pop-up
       const joinNowBtn = document.getElementById('join-now-btn');
