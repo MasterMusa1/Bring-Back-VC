@@ -7,10 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1470.0.min.js"></script>
   <style>
-    /* Custom styles for mobile hamburger menu and audio player */
+    /* Custom styles for mobile hamburger menu, audio player, and social icon animations */
     .hamburger-menu {
       display: none;
     }
@@ -59,6 +58,9 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .social-popup {
+      transition: transform 0.3s ease;
+    }
   </style>
 </head>
 <body class="bg-gray-900 text-gray-200 font-serif">
@@ -74,6 +76,7 @@
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <header class="bg-black/20 backdrop-blur-md border-b border-gray-700/50 p-4 flex justify-between items-center fixed w-full z-40">
+      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">$VC</h1>
       <button class="hamburger-menu sm:hidden text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Toggle navigation menu">
         <i class="fas fa-bars text-2xl"></i>
       </button>
@@ -83,6 +86,7 @@
         <a href="#about" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to About section">About</a>
         <a href="#tokenomics" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to Tokenomics section">Tokenomics</a>
         <a href="#why-buy" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to Why Buy section">Why Buy</a>
+        <a href="#how-to-buy" class="nav-link px-4 sm:px-6 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Navigate to How to Buy section">How to Buy</a>
       </nav>
     </header>
 
@@ -90,12 +94,12 @@
     <section id="studio" class="flex-1 relative pt-20 sm:pt-24 bg-gray-900">
       <div class="max-w-6xl mx-auto py-8 sm:py-12 px-4 sm:px-6">
         <div class="text-center mb-8 sm:mb-12">
-          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">You are welcome to the VC Cultue</h2>
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">You are welcome to the VC Culture</h2>
           <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Immerse yourself in our interactive studio for voice-driven collaboration.</p>
           <p class="text-sm sm:text-lg text-gray-400 mt-4">Contract Address: 
             <span id="contract-address" class="text-blue-400 cursor-pointer relative group" onclick="copyToClipboard('3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump')" title="Click to copy" role="button" tabindex="0">
               3vXsFNrv5akgWVx47ZrRa3ruR2epYW85HbXqTrVkpump
-              <span class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs rounded py-1 px-2">Click to copy</span>
+              <span id="copy-tooltip" class="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-gray-200 text-xs rounded py-1 px-2">Click to copy</span>
             </span>
           </p>
         </div>
@@ -189,7 +193,7 @@
           <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Bring Back VC Token features a unique deflationary model designed for sustainable growth</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8 mb-8 sm:mb-12">
-          <div id="total-supply-card" class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm transform transition-transform duration-300 hover:scale-105">
+          <div id="total-supply-card" class="token-card rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-8 text-center">
               <div class="text-3xl sm:text-4xl mb-4">🪙</div>
               <h3 class="text-xl sm:text-2xl font-bold mb-4 text-blue-400">Total Supply</h3>
@@ -197,7 +201,7 @@
               <p class="text-sm sm:text-base text-gray-300">Fixed maximum supply ensures scarcity and value preservation</p>
             </div>
           </div>
-          <div class="rounded-xl border bg-gradient-to-br from-red-900/50 to-orange-800/50 border-red-700 backdrop-blur-sm">
+          <div id="burn-mechanism-card" class="token-card rounded-xl border bg-gradient-to-br from-red-900/50 to-orange-800/50 border-red-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-8 text-center">
               <div class="text-3xl sm:text-4xl mb-4">🔥</div>
               <h3 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Burn Mechanism</h3>
@@ -205,7 +209,7 @@
               <p class="text-sm sm:text-base text-gray-300">Continuous burning creates deflationary pressure and increases value</p>
             </div>
           </div>
-          <div class="rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm">
+          <div id="zero-tax-card" class="token-card rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-8 text-center">
               <div class="text-3xl sm:text-4xl mb-4">💸</div>
               <h3 class="text-xl sm:text-2xl font-bold mb-4 text-green-400">Zero Tax</h3>
@@ -244,28 +248,28 @@
           <p class="text-sm sm:text-base text-gray-400">Real-time market information</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6 mt-6 sm:mt-8">
-          <div id="price-card" class="rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm transform transition-transform duration-300 hover:scale-105">
+          <div id="price-card" class="token-card rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-6 text-center">
               <div class="text-xl sm:text-2xl mb-2">💰</div>
               <h4 class="text-base sm:text-lg font-semibold text-green-400 mb-2">Price</h4>
               <p id="price" class="text-xl sm:text-2xl font-bold text-white">$0.000000</p>
             </div>
           </div>
-          <div id="holders-card" class="rounded-xl border bg-gradient-to-br from-blue-900/50 to-cyan-800/50 border-blue-700 backdrop-blur-sm">
+          <div id="holders-card" class="token-card rounded-xl border bg-gradient-to-br from-blue-900/50 to-cyan-800/50 border-blue-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-6 text-center">
               <div class="text-xl sm:text-2xl mb-2">👥</div>
               <h4 class="text-base sm:text-lg font-semibold text-blue-400 mb-2">Holders</h4>
               <p id="holders" class="text-xl sm:text-2xl font-bold text-white">1,677</p>
             </div>
           </div>
-          <div class="rounded-xl border bg-gradient-to-br from-green-900/50 to-lime-800/50 border-green-700 backdrop-blur-sm">
+          <div id="price-change-card" class="token-card rounded-xl border bg-gradient-to-br from-green-900/50 to-lime-800/50 border-green-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-6 text-center">
               <div class="text-xl sm:text-2xl mb-2">📈</div>
               <h4 class="text-base sm:text-lg font-semibold text-green-400 mb-2">24h Change</h4>
               <p id="price-change" class="text-xl sm:text-2xl font-bold text-green-400">N/A</p>
             </div>
           </div>
-          <div class="rounded-xl border bg-gradient-to-br from-purple-900/50 to-indigo-800/50 border-purple-700 backdrop-blur-sm">
+          <div id="volume-card" class="token-card rounded-xl border bg-gradient-to-br from-purple-900/50 to-indigo-800/50 border-purple-700 backdrop-blur-sm transform transition-transform duration-300">
             <div class="p-4 sm:p-6 text-center">
               <div class="text-xl sm:text-2xl mb-2">📊</div>
               <h4 class="text-base sm:text-lg font-semibold text-purple-400 mb-2">24h Volume</h4>
@@ -275,7 +279,7 @@
         </div>
         <div class="mt-4 sm:mt-6 text-center">
           <p class="text-sm text-gray-400">Bonding Curve Progress: 0.0% (0 SOL in bonding curve)</p>
-          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 07:48 AM, July 31, 2025</p>
+          <p id="last-updated" class="text-sm text-gray-400 mt-2">Last updated: 12:17 PM, July 31, 2025</p>
           <p class="text-xs text-gray-500 mt-1">Data refreshes every 30 seconds</p>
         </div>
       </div>
@@ -303,6 +307,46 @@
       </div>
     </section>
 
+    <!-- How to Buy Section -->
+    <section id="how-to-buy" class="py-8 sm:py-12 px-4 sm:px-6 bg-gray-900">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-3xl sm:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">How to Buy Bring Back $VC</h2>
+          <p class="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Ready to join the VC community? Follow these simple steps to get your $VC tokens.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div class="token-card rounded-xl border bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-700 backdrop-blur-sm transform transition-transform duration-300">
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-3xl sm:text-4xl mb-4">👜</div>
+              <h3 class="text-xl282 sm:text-2xl font-bold mb-4 text-blue-400">Create a Wallet</h3>
+              <p class="text-sm sm:text-base text-gray-300">Get started by downloading and setting up a Solana wallet, like Phantom, to securely store your tokens.</p>
+            </div>
+          </div>
+          <div class="token-card rounded-xl border bg-gradient-to-br from-green-900/50 to-emerald-800/50 border-green-700 backdrop-blur-sm transform transition-transform duration-300">
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-3xl sm:text-4xl mb-4">🛒</div>
+              <h3 class="text-xl sm:text-2xl font-bold mb-4 text-green-400">Buy</h3>
+              <p class="text-sm sm:text-base text-gray-300">Purchase Solana (SOL) from a cryptocurrency exchange and transfer it to your wallet.</p>
+            </div>
+          </div>
+          <div class="token-card rounded-xl border bg-gradient-to-br from-purple-900/50 to-indigo-800/50 border-purple-700 backdrop-blur-sm transform transition-transform duration-300">
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-3xl sm:text-4xl mb-4">🔄</div>
+              <h3 class="text-xl sm:text-2xl font-bold mb-4 text-purple-400">Swap</h3>
+              <p class="text-sm sm:text-base text-gray-300">Find a decentralized exchange (DEX), like Jupiter, to swap your SOL for $VC tokens.</p>
+            </div>
+          </div>
+          <div class="token-card rounded-xl border bg-gradient-to-br from-red-900/50 to-orange-800/50 border-red-700 backdrop-blur-sm transform transition-transform duration-300">
+            <div class="p-4 sm:p-6 text-center">
+              <div class="text-3xl sm:text-4xl mb-4">📥</div>
+              <h3 class="text-xl sm:text-2xl font-bold mb-4 text-red-400">Receive</h3>
+              <p class="text-sm sm:text-base text-gray-300">Post-swap, your new tokens will be deposited into your wallet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-700/50 py-8 sm:py-12 px-4 sm:px-6">
       <div class="max-w-6xl mx-auto">
@@ -310,11 +354,11 @@
           <div class="p-4 sm:p-8 text-center">
             <p class="text-sm sm:text-base text-gray-300">&copy; 2025 Bring Back VC. All rights reserved.</p>
             <div class="mt-4 flex justify-center space-x-4 sm:space-x-6">
-              <a href="https://t.me/join_vc" target="_blank" class="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Join our Telegram community">
+              <a href="https://t.me/join_vc" target="_blank" class="social-popup flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Join our Telegram community">
                 <i class="fab fa-telegram-plane text-base sm:text-lg"></i>
                 <span class="text-sm sm:text-base">Telegram</span>
               </a>
-              <a href="https://x.com/joinVC_cto" target="_blank" class="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Follow us on X">
+              <a href="https://x.com/joinVC_cto" target="_blank" class="social-popup flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400" aria-label="Follow us on X">
                 <i class="fab fa-x-twitter text-base sm:text-lg"></i>
                 <span class="text-sm sm:text-base">X</span>
               </a>
@@ -326,33 +370,15 @@
   </div>
 
   <script>
-    // Wait for Firebase scripts to load before initializing
+    // Wait for AWS SDK to load before initializing
     document.addEventListener('DOMContentLoaded', () => {
-      // Firebase Configuration
-      const firebaseConfig = {
-        // Replace with your actual Firebase project configuration
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-      };
-
-      // Initialize Firebase
-      if (typeof firebase !== 'undefined') {
-        try {
-          firebase.initializeApp(firebaseConfig);
-          window.storage = firebase.storage();
-          console.log('Firebase initialized successfully');
-        } catch (err) {
-          console.error('Firebase initialization failed:', err);
-          document.getElementById('record-status').textContent = 'Firebase initialization failed';
-        }
-      } else {
-        console.error('Firebase SDK not loaded. Please check the Firebase script inclusion.');
-        document.getElementById('record-status').textContent = 'Firebase SDK not loaded';
-      }
+      // AWS Configuration
+      AWS.config.update({
+        region: 'us-east-1', // Update if your bucket is in a different region
+        credentials: new AWS.Credentials('YOUR_ACCESS_KEY_ID', 'YOUR_SECRET_ACCESS_KEY')
+      });
+      const s3 = new AWS.S3();
+      const bucketName = 'bringbackvc';
 
       // Hamburger Menu Toggle
       const hamburger = document.querySelector('.hamburger-menu');
@@ -423,11 +449,11 @@
             closeMenu();
             setTimeout(() => {
               window.scrollTo({
-                top: section.offsetTop - 64, // Adjust for fixed header
+                top: section.offsetTop - 64,
                 behavior: 'smooth'
               });
               setActiveNavLink();
-            }, window.innerWidth <= 640 ? 300 : 0); // Delay for mobile menu animation
+            }, window.innerWidth <= 640 ? 300 : 0);
           }
         });
       });
@@ -479,10 +505,12 @@
       // Copy to Clipboard Function
       function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-          const tooltip = document.querySelector('#contract-address span');
+          const tooltip = document.getElementById('copy-tooltip');
           tooltip.textContent = 'Copied!';
+          tooltip.classList.remove('hidden');
           setTimeout(() => {
             tooltip.textContent = 'Click to copy';
+            tooltip.classList.add('hidden');
           }, 2000);
         }).catch(err => {
           console.error('Failed to copy:', err);
@@ -667,8 +695,8 @@
       }
 
       async function saveRecording() {
-        if (!window.storage) {
-          recordStatus.textContent = 'Firebase not initialized. Please check configuration.';
+        if (!recordedBuffer) {
+          recordStatus.textContent = 'No recording to save';
           return;
         }
         loadingSpinner.classList.add('active');
@@ -681,11 +709,16 @@
         const name = recordingNameInput.value.trim() || `Recording_${new Date().toLocaleString()}`;
         const processedBuffer = await applyAudioEffect(recordedBuffer, effect, eqSettings);
         const blob = await audioBufferToWav(processedBuffer);
-        const fileName = `${name}_${Date.now()}.wav`;
+        const fileName = `recordings/${name}_${Date.now()}.wav`;
         try {
-          const storageRef = window.storage.ref(`recordings/${fileName}`);
-          await storageRef.put(blob);
-          const url = await storageRef.getDownloadURL();
+          await s3.upload({
+            Bucket: bucketName,
+            Key: fileName,
+            Body: blob,
+            ContentType: 'audio/wav',
+            ACL: 'public-read'
+          }).promise();
+          const url = `https://${bucketName}.s3.amazonaws.com/${fileName}`;
           addRecordingToArchive(name, url, fileName);
           effectControls.classList.add('hidden');
           recordStatus.textContent = 'Recording saved to cloud!';
@@ -696,34 +729,35 @@
           effectSelect.value = 'none';
         } catch (err) {
           recordStatus.textContent = 'Error saving recording to cloud';
-          console.error('Firebase save error:', err);
+          console.error('S3 save error:', err);
         } finally {
           loadingSpinner.classList.remove('active');
         }
       }
 
       async function handleAudioUpload(file) {
-        if (!window.storage) {
-          recordStatus.textContent = 'Firebase not initialized. Please check configuration.';
-          return;
-        }
+        const name = prompt('Enter a name for the uploaded audio:', file.name) || file.name;
+        const fileName = `recordings/${name}_${Date.now()}.wav`;
         loadingSpinner.classList.add('active');
         const reader = new FileReader();
         reader.onload = async () => {
           try {
             const arrayBuffer = reader.result;
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            const name = prompt('Enter a name for the uploaded audio:', file.name) || file.name;
             const blob = await audioBufferToWav(audioBuffer);
-            const fileName = `${name}_${Date.now()}.wav`;
-            const storageRef = window.storage.ref(`recordings/${fileName}`);
-            await storageRef.put(blob);
-            const url = await storageRef.getDownloadURL();
+            await s3.upload({
+              Bucket: bucketName,
+              Key: fileName,
+              Body: blob,
+              ContentType: 'audio/wav',
+              ACL: 'public-read'
+            }).promise();
+            const url = `https://${bucketName}.s3.amazonaws.com/${fileName}`;
             addRecordingToArchive(name, url, fileName);
             recordStatus.textContent = 'Audio uploaded and saved to cloud!';
           } catch (err) {
             recordStatus.textContent = 'Error processing uploaded audio';
-            console.error('Upload error:', err);
+            console.error('S3 upload error:', err);
           } finally {
             loadingSpinner.classList.remove('active');
           }
@@ -745,7 +779,7 @@
             <audio controls src="${url}" class="w-full rounded-lg bg-gray-800/50 accent-blue-500"></audio>
             <div class="flex justify-end space-x-2">
               <button class="rename-btn bg-blue-500 hover:bg-blue-600 text-gray-900 py-1 px-3 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${recording.id}" data-filename="${fileName}">Rename</button>
-              <button class="delete-btn bg-red-500 hover:bg-red-600 text-gray-900 py-1 px-3 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400" data-id="${recording.id}" data-filename="${fileName}">Delete</button>
+              <button class="delete-btn bg-red-500 hover:bg-red-600 text-gray-900 py-1 px-3 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400" data-id="${recording.id}" data-filename="${fileName}">Delete</button>
             </div>
           </div>
         `;
@@ -753,46 +787,30 @@
       }
 
       async function loadRecordings() {
-        if (!window.storage) {
-          console.error('Firebase storage not initialized');
-          document.getElementById('record-status').textContent = 'Firebase not initialized. Please check configuration.';
-          return;
-        }
         loadingSpinner.classList.add('active');
         try {
-          const storageRef = window.storage.ref('recordings');
-          const listResult = await storageRef.listAll();
+          const result = await s3.listObjectsV2({
+            Bucket: bucketName,
+            Prefix: 'recordings/'
+          }).promise();
           recordingsList.innerHTML = '';
           recordings = [];
-          for (const itemRef of listResult.items) {
-            const url = await itemRef.getDownloadURL();
-            const name = itemRef.name.split('_').slice(0, -1).join('_') || 'Unnamed Recording';
-            addRecordingToArchive(name, url, itemRef.name);
+          if (result.Contents) {
+            for (const item of result.Contents) {
+              const name = item.Key.split('/').pop().split('_').slice(0, -1).join('_') || 'Unnamed Recording';
+              const url = `https://${bucketName}.s3.amazonaws.com/${item.Key}`;
+              addRecordingToArchive(name, url, item.Key);
+            }
           }
         } catch (err) {
           console.error('Error loading recordings:', err);
-          document.getElementById('record-status').textContent = 'Error loading recordings';
+          recordStatus.textContent = 'Error loading recordings';
         } finally {
           loadingSpinner.classList.remove('active');
         }
       }
 
-      // Event Listeners
-      recordBtn.addEventListener('click', startRecording);
-      stopBtn.addEventListener('click', stopRecording);
-      saveBtn.addEventListener('click', saveRecording);
-      uploadAudio.addEventListener('change', (e) => {
-        if (e.target.files.length > 0) {
-          handleAudioUpload(e.target.files[0]);
-        }
-      });
-
       recordingsList.addEventListener('click', async (e) => {
-        if (!window.storage) {
-          console.error('Firebase storage not initialized');
-          document.getElementById('record-status').textContent = 'Firebase not initialized. Please check configuration.';
-          return;
-        }
         if (e.target.classList.contains('rename-btn')) {
           const id = parseInt(e.target.dataset.id);
           const fileName = e.target.dataset.filename;
@@ -802,24 +820,29 @@
             if (newName) {
               loadingSpinner.classList.add('active');
               try {
-                const oldRef = window.storage.ref(`recordings/${fileName}`);
-                const blob = await (await fetch(recording.url)).blob();
-                const newFileName = `${newName}_${Date.now()}.wav`;
-                const newRef = window.storage.ref(`recordings/${newFileName}`);
-                await newRef.put(blob);
-                await oldRef.delete();
+                const newFileName = `recordings/${newName}_${Date.now()}.wav`;
+                await s3.copyObject({
+                  Bucket: bucketName,
+                  CopySource: `${bucketName}/${fileName}`,
+                  Key: newFileName,
+                  ACL: 'public-read'
+                }).promise();
+                await s3.deleteObject({
+                  Bucket: bucketName,
+                  Key: fileName
+                }).promise();
                 recording.name = newName;
                 recording.fileName = newFileName;
-                recording.url = await newRef.getDownloadURL();
+                recording.url = `https://${bucketName}.s3.amazonaws.com/${newFileName}`;
                 const recordingDiv = e.target.closest('div');
                 recordingDiv.querySelector('span').textContent = newName;
                 recordingDiv.querySelector('audio').src = recording.url;
                 recordingDiv.querySelector('.rename-btn').dataset.filename = newFileName;
                 recordingDiv.querySelector('.delete-btn').dataset.filename = newFileName;
-                document.getElementById('record-status').textContent = 'Recording renamed';
+                recordStatus.textContent = 'Recording renamed';
               } catch (err) {
                 console.error('Error renaming recording:', err);
-                document.getElementById('record-status').textContent = 'Error renaming recording';
+                recordStatus.textContent = 'Error renaming recording';
               } finally {
                 loadingSpinner.classList.remove('active');
               }
@@ -830,16 +853,29 @@
           const fileName = e.target.dataset.filename;
           loadingSpinner.classList.add('active');
           try {
-            await window.storage.ref(`recordings/${fileName}`).delete();
+            await s3.deleteObject({
+              Bucket: bucketName,
+              Key: fileName
+            }).promise();
             recordings = recordings.filter(r => r.id !== id);
             e.target.closest('div').remove();
-            document.getElementById('record-status').textContent = 'Recording deleted';
+            recordStatus.textContent = 'Recording deleted';
           } catch (err) {
             console.error('Error deleting recording:', err);
-            document.getElementById('record-status').textContent = 'Error deleting recording';
+            recordStatus.textContent = 'Error deleting recording';
           } finally {
             loadingSpinner.classList.remove('active');
           }
+        }
+      });
+
+      // Event Listeners
+      recordBtn.addEventListener('click', startRecording);
+      stopBtn.addEventListener('click', stopRecording);
+      saveBtn.addEventListener('click', saveRecording);
+      uploadAudio.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          handleAudioUpload(e.target.files[0]);
         }
       });
 
@@ -852,6 +888,43 @@
       // Load recordings on page load
       window.addEventListener('load', loadRecordings);
 
+      // Social Icons Heartbeat Animation
+      const socialLinks = document.querySelectorAll('.social-popup');
+      socialLinks.forEach(link => {
+        link.addEventListener('mouseenter', () => {
+          gsap.to(link, {
+            keyframes: [
+              { scale: 1.2, duration: 0.15, ease: 'power1.in' },
+              { scale: 1, duration: 0.15, ease: 'power1.out' },
+              { scale: 1.15, duration: 0.15, ease: 'power1.in' },
+              { scale: 1, duration: 0.15, ease: 'power1.out' }
+            ]
+          });
+        });
+        link.addEventListener('mouseleave', () => {
+          gsap.to(link, { scale: 1, duration: 0.2, ease: 'power2.out' });
+        });
+      });
+
+      // Tokenomics and How to Buy Card Animations
+      const tokenCards = document.querySelectorAll('.token-card');
+      tokenCards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+          gsap.to(card, {
+            scale: 1.1,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, {
+            scale: 1,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        });
+      });
+
       // Fetch Crypto Data
       async function updateCryptoData() {
         try {
@@ -859,65 +932,22 @@
           const holders = 1677;
           const priceChange = 'N/A';
           const volume = 'N/A';
-          const now = new Date().toLocaleTimeString('en-US', { hour12: false });
           document.getElementById('price').textContent = `$${price.toFixed(6)}`;
           document.getElementById('holders').textContent = holders.toLocaleString();
           document.getElementById('price-change').textContent = priceChange;
           document.getElementById('volume').textContent = volume;
-          document.getElementById('last-updated').textContent = `Last updated: ${now}`;
-          console.log('Crypto data updated:', { price, holders, priceChange, volume });
-
-          // Animate Holders card on data update
-          gsap.to('#holders-card', {
-            y: -10,
-            duration: 0.5,
-            yoyo: true,
-            repeat: 1,
-            ease: 'power2.inOut'
-          });
+          document.getElementById('last-updated').textContent = `Last updated: 12:17 PM, July 31, 2025`;
         } catch (err) {
           console.error('Error fetching crypto data:', err.message);
           document.getElementById('price').textContent = '$0.000000';
           document.getElementById('holders').textContent = '1,677';
           document.getElementById('price-change').textContent = 'N/A';
           document.getElementById('volume').textContent = 'N/A';
-          document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString('en-US', { hour12: false })}`;
-          console.warn('Using fallback crypto data');
+          document.getElementById('last-updated').textContent = `Last updated: 12:17 PM, July 31, 2025`;
         }
         setTimeout(updateCryptoData, 30000);
       }
       updateCryptoData();
-
-      // GSAP Animations for Tokenomics and Live Token Data
-      document.getElementById('total-supply-card').addEventListener('mouseenter', () => {
-        gsap.to('#total-supply-card', {
-          scale: 1.1,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      });
-      document.getElementById('total-supply-card').addEventListener('mouseleave', () => {
-        gsap.to('#total-supply-card', {
-          scale: 1,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      });
-
-      document.getElementById('price-card').addEventListener('mouseenter', () => {
-        gsap.to('#price-card', {
-          scale: 1.1,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      });
-      document.getElementById('price-card').addEventListener('mouseleave', () => {
-        gsap.to('#price-card', {
-          scale: 1,
-          duration: 0.3,
-          ease: 'power2.out'
-        });
-      });
     });
   </script>
 </body>
